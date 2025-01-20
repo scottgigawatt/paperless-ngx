@@ -99,7 +99,7 @@ services:
       test: ["CMD", "pg_isready", "-q", "-d", "paperless", "-U", "${POSTGRES_USER}"]
       timeout: ${POSTGRES_HEALTHCHECK_TIMEOUT}
       interval: ${POSTGRES_HEALTHCHECK_INTERVAL}
-      retries: ${POSTGRES_HEALTHCHECK_RETRIES}
+      retries: 10
 
     # Define the container environment
     environment:
@@ -158,7 +158,7 @@ services:
       test: ["CMD", "curl", "-fs", "-S", "--max-time", "2", "http://localhost:8000"]
       timeout: ${PAPERLESS_HEALTHCHECK_TIMEOUT}
       interval: ${PAPERLESS_HEALTHCHECK_INTERVAL}
-      retries: ${PAPERLESS_HEALTHCHECK_RETRIES}
+      retries: 5
 
     # Define the container environment
     environment:
@@ -222,8 +222,8 @@ services:
       test: timeout 10s bash -c ':> /dev/tcp/127.0.0.1/3000' || exit 1
       timeout: ${PAPERLESS_AI_HEALTHCHECK_TIMEOUT}
       interval: ${PAPERLESS_AI_HEALTHCHECK_INTERVAL}
-      retries: ${PAPERLESS_AI_HEALTHCHECK_RETRIES}
       start_period: ${PAPERLESS_AI_HEALTHCHECK_START_PERIOD}
+      retries: 3
 
     # Define the host and container ports
     ports:

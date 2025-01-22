@@ -29,16 +29,18 @@ version: "2.9"
 #
 # Setup default properties for all or most containers
 #
-x-default-container: &default-container # YAML anchor for default container
-  pull_policy: always                   # Ensure that the image is always pulled
-  restart: on-failure:5                 # Restart the container on failure up to 5 times
-  security_opt:                         # Configure container security options
-    - no-new-privileges:true            # Disallow addition of additional privileges
-  logging:                              # Configure container logging options
-    driver: "json-file"                 # Use JSON file logging driver
-    options:
-      max-size: ${LOG_MAX_SIZE}         # Maximum file size for logs files
-      max-file: ${LOG_MAX_FILE}         # Maximum number of log files to retain
+x-default-container: &default-container             # YAML anchor for default container
+  pull_policy: always                               # Ensure that the image is always pulled
+  restart: on-failure:5                             # Restart the container on failure up to 5 times
+  security_opt:                                     # Configure container security options
+    - no-new-privileges:true                        # Disallow addition of additional privileges
+  logging:                                          # Configure container logging options
+    driver: "json-file"                             # Use JSON file logging driver
+    options:                                        # Add container logging options
+      max-size: ${LOG_MAX_SIZE}                     # Maximum file size for logs files
+      max-file: ${LOG_MAX_FILE}                     # Maximum number of log files to retain
+  labels:                                           # Add container labels
+    - "com.centurylinklabs.watchtower.enable=false" # Exclude container from Watchtower
 
 #
 # Define the services section
@@ -60,6 +62,10 @@ services:
     mem_limit: ${REDIS_MEM_LIMIT}             # Set the maximum memory
     mem_reservation: ${REDIS_MEM_RESERVATION} # Set the initially requested memory
     cpu_shares: ${REDIS_CPU_SHARES}           # Set relative CPU weight versus other containers
+
+    # List of sysctls set for the container
+    sysctls:
+      - net.core.somaxconn=512 # Increase the number of incoming connections backlog
 
     # Command used to start the container
     command:

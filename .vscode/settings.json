@@ -1,6 +1,7 @@
 {
     "cSpell.words": [
         "Bogdan",
+        "centurylinklabs",
         "clusterzx",
         "DBENGINE",
         "DBHOST",
@@ -16,6 +17,8 @@
         "paperlessuser",
         "redispass",
         "requirepass",
+        "somaxconn",
+        "sysctls",
         "Tika",
         "USERMAP",
         "WEBUI"

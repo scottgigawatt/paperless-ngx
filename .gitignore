@@ -1,2 +1,4 @@
 .DS_Store
 .env
+.secrets
+config/paperless-ngx/db/**

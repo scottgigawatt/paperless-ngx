@@ -168,27 +168,27 @@ services:
 
     # Define the container environment
     environment:
-      PAPERLESS_REDIS: ${PAPERLESS_REDIS}                                           # Redis connection string for caching and task queuing
-      PAPERLESS_DBENGINE: ${PAPERLESS_DBENGINE}                                     # Database engine (e.g., PostgreSQL)
-      PAPERLESS_DBHOST: ${PAPERLESS_DBHOST}                                         # Database hostname
-      PAPERLESS_DBNAME: ${POSTGRES_DB}                                              # Database name
-      PAPERLESS_DBUSER: ${POSTGRES_USER}                                            # Database username
-      PAPERLESS_DBPASS: ${POSTGRES_PASSWORD}                                        # Database password
-      PAPERLESS_EMPTY_TRASH_DIR: ${PAPERLESS_EMPTY_TRASH_DIR}                       # Enable/disable automatic trash cleanup
-      PAPERLESS_FILENAME_FORMAT: ${PAPERLESS_FILENAME_FORMAT}                       # Document storage format
-      PAPERLESS_OCR_ROTATE_PAGES_THRESHOLD: ${PAPERLESS_OCR_ROTATE_PAGES_THRESHOLD} # Threshold for automatic page rotation in OCR
-      PAPERLESS_TASK_WORKERS: ${PAPERLESS_TASK_WORKERS}                             # Number of worker threads for background tasks
-      USERMAP_UID: ${DEFAULT_UID}                                                   # User ID mapping inside the container
-      USERMAP_GID: ${DEFAULT_GID}                                                   # Group ID mapping inside the container
-      PAPERLESS_TIME_ZONE: ${TZ}                                                    # Time zone setting
-      PAPERLESS_ADMIN_USER: ${PAPERLESS_ADMIN_USER}                                 # Admin username for web interface
-      PAPERLESS_ADMIN_PASSWORD: ${PAPERLESS_ADMIN_PASSWORD}                         # Admin password for web interface
-      PAPERLESS_URL: ${PAPERLESS_URL}                                               # External URL for Paperless instance
-      PAPERLESS_CSRF_TRUSTED_ORIGINS: ${PAPERLESS_CSRF_TRUSTED_ORIGINS}             # Trusted origins for CSRF protection
-      PAPERLESS_OCR_LANGUAGE: ${PAPERLESS_OCR_LANGUAGE}                             # Default OCR language (e.g., eng for English)
-      PAPERLESS_TIKA_ENABLED: ${PAPERLESS_TIKA_ENABLED}                             # Toggle Tika for text extraction
-      PAPERLESS_TIKA_GOTENBERG_ENDPOINT: ${PAPERLESS_TIKA_GOTENBERG_ENDPOINT}       # URL for Gotenberg (PDF conversion)
-      PAPERLESS_TIKA_ENDPOINT: ${PAPERLESS_TIKA_ENDPOINT}                           # URL for Apache Tika (text extraction)
+      PAPERLESS_REDIS: ${PAPERLESS_REDIS}                                                                 # Redis connection string for caching and task queuing
+      PAPERLESS_DBENGINE: ${PAPERLESS_DBENGINE}                                                           # Database engine (e.g., PostgreSQL)
+      PAPERLESS_DBHOST: ${PAPERLESS_DBHOST}                                                               # Database hostname
+      PAPERLESS_DBNAME: ${POSTGRES_DB}                                                                    # Database name
+      PAPERLESS_DBUSER: ${POSTGRES_USER}                                                                  # Database username
+      PAPERLESS_DBPASS: ${POSTGRES_PASSWORD}                                                              # Database password
+      PAPERLESS_EMPTY_TRASH_DIR: ${PAPERLESS_EMPTY_TRASH_DIR}                                             # Enable/disable automatic trash cleanup
+      PAPERLESS_FILENAME_FORMAT: '{{ created_year }}/{{ correspondent }}/{{ document_type }}/{{ title }}' # Document storage format
+      PAPERLESS_OCR_ROTATE_PAGES_THRESHOLD: ${PAPERLESS_OCR_ROTATE_PAGES_THRESHOLD}                       # Threshold for automatic page rotation in OCR
+      PAPERLESS_TASK_WORKERS: ${PAPERLESS_TASK_WORKERS}                                                   # Number of worker threads for background tasks
+      USERMAP_UID: ${DEFAULT_UID}                                                                         # User ID mapping inside the container
+      USERMAP_GID: ${DEFAULT_GID}                                                                         # Group ID mapping inside the container
+      PAPERLESS_TIME_ZONE: ${TZ}                                                                          # Time zone setting
+      PAPERLESS_ADMIN_USER: ${PAPERLESS_ADMIN_USER}                                                       # Admin username for web interface
+      PAPERLESS_ADMIN_PASSWORD: ${PAPERLESS_ADMIN_PASSWORD}                                               # Admin password for web interface
+      PAPERLESS_URL: ${PAPERLESS_URL}                                                                     # External URL for Paperless instance
+      PAPERLESS_CSRF_TRUSTED_ORIGINS: ${PAPERLESS_CSRF_TRUSTED_ORIGINS}                                   # Trusted origins for CSRF protection
+      PAPERLESS_OCR_LANGUAGE: ${PAPERLESS_OCR_LANGUAGE}                                                   # Default OCR language (e.g., eng for English)
+      PAPERLESS_TIKA_ENABLED: ${PAPERLESS_TIKA_ENABLED}                                                   # Toggle Tika for text extraction
+      PAPERLESS_TIKA_GOTENBERG_ENDPOINT: ${PAPERLESS_TIKA_GOTENBERG_ENDPOINT}                             # URL for Gotenberg (PDF conversion)
+      PAPERLESS_TIKA_ENDPOINT: ${PAPERLESS_TIKA_ENDPOINT}                                                 # URL for Apache Tika (text extraction)
 
     # Define the host and container ports
     ports:

@@ -1,99 +1,126 @@
+# Paperless-ngx 🗃️🤖
 
-# Paperless-ngx Deployment on Synology NAS
-
-This repository provides a Docker Compose configuration for deploying [Paperless-ngx](https://github.com/paperless-ngx/paperless-ngx), a document management system, on a Synology NAS, along with AI-powered document processing.
-
-## Overview
-
-Paperless-ngx transforms your physical documents into a searchable online archive, reducing paper clutter. This setup includes support for:
-
-- **Office Files Support**: Convert and manage `.docx`, `.pdf`, and other document formats.
-- **AI-Powered Categorization**: Automatically categorize and extract metadata from documents using `Paperless-ngx AI`.
-- **OCR Processing**: Optical Character Recognition (OCR) ensures scanned documents are searchable.
-
-## Features
-
-- **Document Digitization**: Convert physical documents into structured, searchable digital formats.
-- **Full-Text Search**: Quickly locate scanned documents with OCR text extraction.
-- **Office File Compatibility**: Convert `.docx`, `.pptx`, `.xlsx` using Gotenberg and Apache Tika.
-- **AI-Powered Processing**: Automate metadata extraction and document categorization with `Paperless-ngx AI`.
-- **Web Interface**: Access and manage your document archive from any browser.
-
-## Prerequisites
-
-- **Synology NAS**: Ensure your NAS supports Docker.
-- **Docker & Portainer**: Install Docker and Portainer on your Synology NAS.
-- **Wildcard Certificate**: Obtain a `synology.me` wildcard certificate for HTTPS support.
-- **Environment Variables**: Configure `.env` with the necessary variables.
-
-## Setup Instructions
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/scottgigawatt/paperless-ngx.git
-```
-
-### 2. Navigate to the Project Directory
-
-```bash
-cd paperless-ngx
-```
-
-### 3. Configure the Environment Variables
-
-Rename `.env.example` to `.env` and modify the values to match your environment:
-
-```bash
-cp .env.example .env
-vim .env  # Edit environment variables
-```
-
-### 4. Create Necessary Directories
-
-Ensure the following directories exist on your NAS under the Docker folder:
-
-```bash
-mkdir -p /volume1/docker/paperlessngx/{consume,data,db,export,media,redis,trash,ai}
-```
-
-### 5. Deploy the Stack via Docker Compose
-
-Run the following command to deploy the services:
-
-```bash
-docker compose up -d
-```
-
-### 6. Access Paperless-ngx
-
-Once deployed, access the application at:
-
-- **Paperless-ngx Web Interface**: `https://paperlessngx.yourname.synology.me`
-- **Paperless-ngx AI Web Interface**: `http://localhost:3000`
-
-## Services Overview
-
-The following services are deployed via Docker:
-
-- **Redis**: Provides in-memory caching and message queuing.
-- **PostgreSQL**: Stores document metadata and user information.
-- **Gotenberg**: Handles Office file conversion.
-- **Apache Tika**: Extracts metadata and text from uploaded files.
-- **Paperless-ngx**: The document management system, handling OCR and user interface.
-- **Paperless-ngx AI**: AI-based document categorization and automation.
-
-## Credits
-
-This project is based on guides by **Marius Bogdan Lixandru**:
-
-- **Paperless-ngx Setup**: [Guide](https://mariushosting.com/synology-install-paperless-ngx-with-office-files-support/)
-- **Paperless-ngx AI Setup**: [Guide](https://mariushosting.com/how-to-install-paperless-ai-on-your-synology-nas/)
-
-## License
-
-This project is licensed under the Apache 2 License. See the [LICENSE](LICENSE) file for details.
+Paperless-ngx transforms your mountains of paper clutter into a sleek, searchable, digital archive. Deploy it on your Synology NAS and enjoy the magic of AI-powered document management. No more hunting for receipts like a pirate searching for treasure! 🏴‍☠️📄
 
 ---
 
-For more information on Paperless-ngx, visit the [official GitHub repository](https://github.com/paperless-ngx/paperless-ngx).
+## Overview 📝
+
+This repository provides a Docker Compose configuration for deploying [Paperless-ngx](https://github.com/paperless-ngx/paperless-ngx), a powerful document management system, on a Synology NAS. This setup supports:
+
+- **OCR-Powered Search** 🔍 – Scan, search, and retrieve documents with ease.
+- **AI-Powered Categorization** 🤖 – Let Paperless-ngx AI auto-sort and tag your documents.
+- **Office File Support** 📑 – Convert and manage `.docx`, `.pdf`, and other formats.
+- **Synology NAS Friendly** 🏠 – Deploy with DSM Container Manager or Portainer.
+
+---
+
+## Configuring IPAM and Network Firewall 🌍
+
+This project uses **Docker IPAM (IP Address Management)** to control container networking. You may need to configure your **firewall** to allow access based on the defined subnet.
+
+### **IPAM Configuration**
+
+You can configure the following settings in your [`.env`](example.env) file:
+
+```bash
+# Define the subnet range for the network
+COMPOSE_NETWORK_SUBNET="${COMPOSE_NETWORK_SUBNET:-172.24.0.0/16}"
+
+# Define the IP range for containers
+COMPOSE_NETWORK_IP_RANGE="${COMPOSE_NETWORK_IP_RANGE:-172.24.5.0/24}"
+
+# Define the network gateway
+COMPOSE_NETWORK_GATEWAY="${COMPOSE_NETWORK_GATEWAY:-172.24.5.254}"
+```
+
+For more details, check the **[Docker Compose IPAM documentation](https://docs.docker.com/compose/compose-file/06-networks/#ipam)**.
+
+---
+
+## Deployment 🚀
+
+This guide walks you through deploying Paperless-ngx using **DSM Container Manager** (recommended for Synology NAS). You can also use **Portainer** if you prefer a different UI.
+
+### **1. Folders Are Pre-Created** 📂
+
+No need to manually create folders—this project automatically sets them up in the `config` directory:
+
+```console
+config/
+├── paperless-ngx/
+│   ├── consume/
+│   ├── data/
+│   ├── db/
+│   ├── export/
+│   ├── media/
+│   ├── redis/
+│   ├── trash/
+```
+
+### **2. Copy and Edit the Environment File** 📜
+
+A sample environment file is already included! Simply copy it and update the values as needed:
+
+```sh
+cp example.env .env
+nano .env  # Edit with your settings
+```
+
+### **3. Deploy Using DSM Container Manager** 🏠
+
+1. Open **DSM Container Manager**.
+2. Navigate to **Projects** → Click **Create**.
+3. Select **Import YAML** and browse to the `docker-compose.yml` file in the project root.
+4. Click **Next** → Review settings → Click **Apply**.
+
+### **4. Alternative Deployment with Portainer** 🖥️
+
+If you prefer **Portainer**, follow these steps:
+
+1. Go to **Stacks** in Portainer.
+2. Click **Add Stack** → Name it `paperless`.
+3. Browse to the `docker-compose.yml` file in the project root.
+4. Click **Deploy the Stack**.
+
+### **5. Access the Web Interface** 🌐
+
+Once deployed, open your browser and go to:
+
+```console
+https://paperlessngx.yourname.synology.me
+```
+
+Log in with your admin credentials and start managing your documents like a pro! 🏆
+
+---
+
+## Docker Compose Configuration 🐳
+
+The full `docker-compose.yml` file is included in the **project root**. Check it out if you want to tweak or customize your deployment.
+
+📄 **[View docker-compose.yml](./docker-compose.yml)**
+
+---
+
+## Troubleshooting 🛠️
+
+### **Paperless-ngx can't connect to Redis?** ❌
+
+- Ensure your **firewall rules allow access** to the subnet defined in `COMPOSE_NETWORK_SUBNET`.
+- Make sure your `.env` file has the correct `PAPERLESS_REDIS` value.
+- Run `docker logs paperless` to check for errors.
+- Try restarting the stack with `docker compose down && docker compose up -d`.
+
+### **Can't access the web interface?** 🌍
+
+- Ensure the correct NAS IP and port are used.
+- Run `docker ps` to check if all containers are running.
+
+---
+
+## Conclusion 🎉
+
+Congratulations! 🎊 You've set up **Paperless-ngx** on your Synology NAS like a digital wizard. Your document chaos is now history! 🚀🗃️
+
+For more advanced configurations, check out the [official Paperless-ngx documentation](https://paperless-ngx.readthedocs.io/).

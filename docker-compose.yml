@@ -10,10 +10,8 @@
 #   - PostgreSQL: Stores and manages document metadata and user information.
 #   - Gotenberg: Handles Office file conversion for better compatibility.
 #   - Apache Tika: Extracts metadata and text from documents for indexing and search.
-#   - Paperless-ngx: The core application for document management, digitization,
-#     and OCR processing.
-#   - Paperless-ngx AI: Adds AI-powered document categorization and processing
-#     to enhance automation and efficiency.
+#   - Paperless-ngx: The core application for document management, digitization, and OCR processing.
+#   - Paperless-ngx AI: AI-powered document categorization and processing for automation and efficiency.
 #   - Ollama: Provides a local LLM service for AI-driven enhancements.
 #   - Ollama WebUI: A web-based interface to interact with Ollama's AI models.
 #

@@ -10,11 +10,13 @@ This project is based on the great guides provided by [**Lixandru Marius Bogdan*
 
 - 📖 **[Paperless-ngx Setup](https://mariushosting.com/synology-install-paperless-ngx-with-office-files-support/)**
 - 🤖 **[Paperless-ngx AI Setup](https://mariushosting.com/how-to-install-paperless-ai-on-your-synology-nas/)**
+- 🧠 **[Ollama Setup](https://mariushosting.com/how-to-install-ollama-on-your-synology-nas/)**
 
 This repository provides a Docker Compose configuration for deploying [Paperless-ngx](https://github.com/paperless-ngx/paperless-ngx), a powerful document management system, on a Synology NAS. This setup supports:
 
 - **OCR-Powered Search** 🔍 – Scan, search, and retrieve documents with ease.
 - **AI-Powered Categorization** 🤖 – Let Paperless-ngx AI auto-sort and tag your documents.
+- **Local AI Model Serving** 🧠 – Run AI models locally with Ollama.
 - **Office File Support** 📑 – Convert and manage `.docx`, `.pdf`, and other formats.
 - **Synology NAS Friendly** 🏠 – Deploy with DSM Container Manager or Portainer.
 
@@ -53,6 +55,11 @@ No need to manually create folders—this project automatically sets them up in 
 
 ```console
 config/
+├── ollama/
+│   ├── data/
+│   ├── entrypoint/
+│   ├── webui/
+├── paperless-ai/
 ├── paperless-ngx/
 │   ├── consume/
 │   ├── data/
@@ -69,7 +76,7 @@ A sample environment file is already included! Simply copy it and update the val
 
 ```sh
 cp example.env .env
-nano .env  # Edit with your settings
+vim .env  # Edit with your settings
 ```
 
 ### **3. Deploy Using DSM Container Manager** 🏠
@@ -88,15 +95,14 @@ If you prefer **Portainer**, follow these steps:
 3. Browse to the `docker-compose.yml` file in the project root.
 4. Click **Deploy the Stack**.
 
-### **5. Access the Web Interface** 🌐
+### **5. Access the Web Interfaces** 🌐
 
-Once deployed, open your browser and go to:
+Once deployed, open your browser and access the services:
 
-```console
-https://paperlessngx.yourname.synology.me
-```
+- **Paperless-ngx**: `https://paperlessngx.yourname.synology.me`
+- **Ollama WebUI**: `https://ollama.yourname.synology.me`
 
-Log in with your admin credentials and start managing your documents like a pro! 🏆
+Log in with your admin credentials and start managing documents and AI models! 🏆
 
 ---
 
@@ -117,7 +123,13 @@ The full `docker-compose.yml` file is included in the **project root**. Check it
 - Run `docker logs paperless` to check for errors.
 - Try restarting the stack with `docker compose down && docker compose up -d`.
 
-### **Can't access the web interface?** 🌍
+### **Ollama WebUI not connecting to Ollama?** 🤖
+
+- Ensure the **OLLAMA_BASE_URL** in your `.env` is set correctly.
+- Check if the **Ollama container is running**: `docker ps | grep ollama`
+- Restart the Ollama service: `docker restart ollama`
+
+### **Can't access the web interfaces?** 🌍
 
 - Ensure the correct NAS IP and port are used.
 - Run `docker ps` to check if all containers are running.
@@ -126,6 +138,6 @@ The full `docker-compose.yml` file is included in the **project root**. Check it
 
 ## Conclusion 🎉
 
-Congratulations! 🎊 You've set up **Paperless-ngx** on your Synology NAS like a digital wizard. Your document chaos is now history! 🚀🗃️
+Congratulations! 🎊 You've set up **Paperless-ngx and Ollama** on your Synology NAS. Now you can manage documents efficiently while running local AI models. 🚀🗃️🤖
 
-For more advanced configurations, check out the [official Paperless-ngx documentation](https://paperless-ngx.readthedocs.io/).
+For more advanced configurations, check out the [official Paperless-ngx documentation](https://paperless-ngx.readthedocs.io/) and [Ollama documentation](https://ollama.com/docs).

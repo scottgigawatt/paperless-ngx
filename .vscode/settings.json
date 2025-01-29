@@ -12,15 +12,18 @@
         "healthcheck",
         "isready",
         "Lixandru",
+        "ollama",
         "paperlessngx",
         "paperlesspass",
         "paperlessuser",
         "redispass",
         "requirepass",
+        "rocm",
         "somaxconn",
         "sysctls",
         "Tika",
         "USERMAP",
-        "WEBUI"
+        "WEBUI",
+        "yourname"
     ]
 }

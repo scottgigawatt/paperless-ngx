@@ -14,11 +14,14 @@
 #     and OCR processing.
 #   - Paperless-ngx AI: Adds AI-powered document categorization and processing
 #     to enhance automation and efficiency.
+#   - Ollama: Provides a local LLM service for AI-driven enhancements.
+#   - Ollama WebUI: A web-based interface to interact with Ollama's AI models.
 #
 # This project is based on the guides provided by Lixandru Marius Bogdan.
 # For detailed instructions and additional configurations, visit:
 # - Paperless-ngx Setup: https://mariushosting.com/synology-install-paperless-ngx-with-office-files-support/
 # - Paperless-ngx AI Setup: https://mariushosting.com/how-to-install-paperless-ai-on-your-synology-nas/
+# - Ollama Setup: https://mariushosting.com/how-to-install-ollama-on-your-synology-nas/
 #
 
 #
@@ -39,8 +42,6 @@ x-default-container: &default-container             # YAML anchor for default co
     options:                                        # Add container logging options
       max-size: ${LOG_MAX_SIZE}                     # Maximum file size for logs files
       max-file: ${LOG_MAX_FILE}                     # Maximum number of log files to retain
-  labels:                                           # Add container labels
-    - "com.centurylinklabs.watchtower.enable=false" # Exclude container from Watchtower
 
 #
 # Define the services section
@@ -102,10 +103,10 @@ services:
 
     # Command used to check container health
     healthcheck:
-      test: ["CMD", "pg_isready", "-q", "-d", "paperless", "-U", "${POSTGRES_USER}"] # Test command
-      timeout: ${POSTGRES_HEALTHCHECK_TIMEOUT}                                       # Test timeout
-      interval: ${POSTGRES_HEALTHCHECK_INTERVAL}                                     # Test check interval
-      retries: 10                                                                    # Test maximum retries
+      test: ["CMD", "pg_isready", "-q", "-d", "paperless", "-U", "${POSTGRES_USER}"] # Check if PostgreSQL is ready
+      timeout: ${POSTGRES_HEALTHCHECK_TIMEOUT}                                       # Fail if it exceeds this duration
+      interval: ${POSTGRES_HEALTHCHECK_INTERVAL}                                     # Run the check at this interval
+      retries: 10                                                                    # Mark as unhealthy after 10 failures
 
     # Define the container environment
     environment:
@@ -161,10 +162,10 @@ services:
 
     # Command used to check container health
     healthcheck:
-      test: ["CMD", "curl", "-fs", "-S", "--max-time", "2", "http://localhost:8000"] # Test command
-      timeout: ${PAPERLESS_HEALTHCHECK_TIMEOUT}                                      # Test timeout
-      interval: ${PAPERLESS_HEALTHCHECK_INTERVAL}                                    # Test check interval
-      retries: 5                                                                     # Test maximum retries
+      test: ["CMD", "curl", "-fs", "-S", "--max-time", "2", "http://localhost:8000"] # Ensure the web UI is responsive
+      timeout: ${PAPERLESS_HEALTHCHECK_TIMEOUT}                                      # Fail if it exceeds this duration
+      interval: ${PAPERLESS_HEALTHCHECK_INTERVAL}                                    # Run the check at this interval
+      retries: 5                                                                     # Mark as unhealthy after 5 failures
 
     # Define the container environment
     environment:
@@ -225,11 +226,12 @@ services:
 
     # Command used to check container health
     healthcheck:
-      test: timeout 10s bash -c ':> /dev/tcp/127.0.0.1/3000' || exit 1 # Test command
-      timeout: ${PAPERLESS_AI_HEALTHCHECK_TIMEOUT}                     # Test timeout
-      interval: ${PAPERLESS_AI_HEALTHCHECK_INTERVAL}                   # Test check interval
-      start_period: ${PAPERLESS_AI_HEALTHCHECK_START_PERIOD}           # Test grace period
-      retries: 3                                                       # Test maximum retries
+      test: timeout 10s bash -c ':> /dev/tcp/127.0.0.1/3000' || exit 1 # Check if port 3000 is open
+      timeout: ${PAPERLESS_AI_HEALTHCHECK_TIMEOUT}                     # Fail if it exceeds this duration
+      interval: ${PAPERLESS_AI_HEALTHCHECK_INTERVAL}                   # Run the check at this interval
+      start_period: ${PAPERLESS_AI_HEALTHCHECK_START_PERIOD}           # Grace period before checks start
+      retries: 3                                                       # Mark as unhealthy after 3 failures
+
 
     # Define the host and container ports
     ports:
@@ -242,7 +244,79 @@ services:
     # Specify container service dependencies
     depends_on:
       paperless-ngx:
-        condition: service_healthy # Wait for paperless-ngx healthcheck to report healthy
+        condition: service_healthy # Wait for paperless-ngx service healthcheck to report healthy
+
+  #
+  # Define the 'ollama' service
+  #
+  ollama:
+    # Docker image and container information
+    <<: *default-container               # Pull in the default container information
+    image: ollama/ollama:${OLLAMA_TAG}   # Run using the specified tag. For AMD CPU, use 'rocm' tag instead 'latest'
+    container_name: ollama-${OLLAMA_TAG} # Append Docker image tag to container name
+    hostname: ollama                     # Set the container hostname
+
+    # Entrypoint to start the container
+    entrypoint: ["/usr/bin/bash", "/entrypoint.sh"]  # Run the entrypoint script with Bash
+
+    # Command used to check container health
+    healthcheck:
+      test: ["CMD", "ollama", "--version"]             # Check if Ollama responds with its version
+      timeout: ${OLLAMA_HEALTHCHECK_TIMEOUT}           # Fail if the check exceeds this timeout
+      interval: ${OLLAMA_HEALTHCHECK_INTERVAL}         # Run the check on this interval
+      start_period: ${OLLAMA_HEALTHCHECK_START_PERIOD} # Grace period before checks start
+      retries: 3                                       # Mark as unhealthy after 3 failures
+
+    # Define the container environment
+    environment:
+      MODELS: ${OLLAMA_MODELS}                        # Models available for use, e.g., 'llama3.2,gemma2,mistral' (See: https://ollama.com/library)
+      OLLAMA_INSTALL_MODELS: ${OLLAMA_INSTALL_MODELS} # Models installed on startup, e.g., 'llama3.2,gemma2,mistral' (See: https://ollama.com/library)
+      OLLAMA_HOSTNAME: ${OLLAMA_HOSTNAME}             # Custom hostname for the Ollama service
+
+    # Define the host and container ports
+    ports:
+      - ${OLLAMA_PORT}:11434 # Ollama API port
+
+    # Mount host directories into the container
+    volumes:
+      - ${OLLAMA_DATA_PATH}:/root/.ollama:rw     # Mount data directory
+      - ${OLLAMA_ENTRYPOINT_PATH}:/entrypoint.sh # Mount entrypoint directory
+
+  #
+  # Define the 'ollama-webui' service
+  #
+  ollama-webui:
+    # Docker image and container information
+    <<: *default-container                                   # Pull in the default container information
+    image: ghcr.io/open-webui/open-webui:${OLLAMA_WEBUI_TAG} # Run using the specified tag
+    container_name: ollama-webui-${OLLAMA_WEBUI_TAG}         # Append Docker image tag to container name
+    hostname: ollama-webui                                   # Set the container hostname
+
+    # Command used to check container health
+    healthcheck:
+      test: timeout 10s bash -c ':> /dev/tcp/127.0.0.1/8080' || exit 1 # Check if port 8080 is open
+      timeout: ${OLLAMA_WEBUI_HEALTHCHECK_TIMEOUT}                     # Fail if it exceeds the specified duration
+      interval: ${OLLAMA_WEBUI_HEALTHCHECK_INTERVAL}                   # Run the check at this interval
+      start_period: ${OLLAMA_WEBUI_HEALTHCHECK_START_PERIOD}           # Grace period before checks start
+      retries: 3                                                       # Mark as unhealthy after 3 failures
+
+    # Define the container environment
+    environment:
+      OLLAMA_BASE_URL: ${OLLAMA_WEBUI_BASE_URL}    # Base URL for the Ollama service API
+      WEBUI_SECRET_KEY: ${OLLAMA_WEBUI_SECRET_KEY} # Secret key for authentication and security
+
+    # Define the host and container ports
+    ports:
+      - ${OLLAMA_WEBUI_PORT}:8080 # Ollama web UI port
+
+    # Mount host directories into the container
+    volumes:
+      - ${OLLAMA_WEBUI_CONFIG_PATH}:/app/backend/data:rw # Mount web UI config directory
+
+    # Specify container service dependencies
+    depends_on:
+      ollama:
+        condition: service_healthy # Wait for ollama service healthcheck to report healthy
 
 #
 # Define the networks section

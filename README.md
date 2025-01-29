@@ -6,6 +6,11 @@ Paperless-ngx transforms your mountains of paper clutter into a sleek, searchabl
 
 ## Overview 📝
 
+This project is based on the great guides provided by [**Lixandru Marius Bogdan**](https://github.com/mariushosting). If you find his work helpful, consider supporting him!
+
+- 📖 **[Paperless-ngx Setup](https://mariushosting.com/synology-install-paperless-ngx-with-office-files-support/)**
+- 🤖 **[Paperless-ngx AI Setup](https://mariushosting.com/how-to-install-paperless-ai-on-your-synology-nas/)**
+
 This repository provides a Docker Compose configuration for deploying [Paperless-ngx](https://github.com/paperless-ngx/paperless-ngx), a powerful document management system, on a Synology NAS. This setup supports:
 
 - **OCR-Powered Search** 🔍 – Scan, search, and retrieve documents with ease.

@@ -6,11 +6,10 @@ Paperless-ngx transforms your mountains of paper clutter into a sleek, searchabl
 
 ## Overview 📝
 
-This repository adapts the guides from [**Lixandru Marius Bogdan**](https://github.com/mariushosting) to create a **complete all-in-one deployment** for **Paperless-ngx, Paperless-AI, and Ollama**. It allows you to deploy all services seamlessly onto a **Synology NAS** using **Container Manager** or **Portainer**.
+This repository adapts the guides from [**Lixandru Marius Bogdan**](https://github.com/mariushosting) to create a **complete all-in-one deployment** for **Paperless-ngx and Paperless-AI**. It allows you to deploy all services seamlessly onto a **Synology NAS** using **Container Manager** or **Portainer**.
 
 - 📖 **[Paperless-ngx Setup](https://mariushosting.com/synology-install-paperless-ngx-with-office-files-support/)**
 - 🤖 **[Paperless-ngx AI Setup](https://mariushosting.com/how-to-install-paperless-ai-on-your-synology-nas/)**
-- 🧠 **[Ollama Setup](https://mariushosting.com/how-to-install-ollama-on-your-synology-nas/)**
 - 🖥️ **[Portainer Guide](https://mariushosting.com/synology-how-to-update-portainer/)**
 
 Alternatively, you can use my **[🐳 Docker Compose deployment for Portainer](https://github.com/scottgigawatt/portainer)** to deploy and manage Portainer on your NAS before setting up this project.
@@ -19,7 +18,6 @@ This setup supports:
 
 - **OCR-Powered Search** 🔍 – Scan, search, and retrieve documents with ease.
 - **AI-Powered Categorization** 🤖 – Let Paperless-ngx AI auto-sort and tag your documents.
-- **Local AI Model Serving** 🧠 – Run AI models locally with Ollama.
 - **Office File Support** 📑 – Convert and manage `.docx`, `.pdf`, and other formats.
 - **Synology NAS Friendly** 🏠 – Deploy with DSM Container Manager or Portainer.
 
@@ -74,10 +72,6 @@ No need to manually create folders—this project automatically sets them up in 
 
 ```console
 config/
-├── ollama/
-│   ├── data/
-│   ├── entrypoint/
-│   ├── webui/
 ├── paperless-ai/
 ├── paperless-ngx/
 │   ├── consume/
@@ -116,12 +110,11 @@ If you prefer **Portainer**, follow these steps:
 
 ### **5. Access the Web Interfaces** 🌐
 
-Once deployed, open your browser and access the services:
+Once deployed, open your browser and access the service:
 
 - **Paperless-ngx**: `https://paperlessngx.yourname.synology.me`
-- **Ollama WebUI**: `https://ollama.yourname.synology.me`
 
-Log in with your admin credentials and start managing documents and AI models! 🏆
+Log in with your admin credentials and start managing documents! 🏆
 
 ---
 
@@ -198,12 +191,6 @@ sudo sysctl net.core.somaxconn=65535
 
 Or reboot your NAS for the changes to take effect.
 
-### **Ollama WebUI not connecting to Ollama?** 🤖
-
-- Ensure the **OLLAMA_BASE_URL** in your `.env` is set correctly.
-- Check if the **Ollama container is running**: `docker ps | grep ollama`
-- Restart the Ollama service: `docker restart ollama`
-
 ### **Can't access the web interfaces?** 🌍
 
 - Ensure the correct NAS IP and port are used.
@@ -213,6 +200,6 @@ Or reboot your NAS for the changes to take effect.
 
 ## Conclusion 🎉
 
-Congratulations! 🎊 You've set up **Paperless-ngx, Paperless-AI, and Ollama** on your Synology NAS. Now you can manage documents efficiently while running local AI models. 🚀🗃️🤖
+Congratulations! 🎊 You've set up **Paperless-ngx, and Paperless-AI** on your Synology NAS. Now you can manage documents efficiently using AI models. 🚀🗃️🤖
 
-For more advanced configurations, check out the [official Paperless-ngx documentation](https://paperless-ngx.readthedocs.io/), [Paperless-AI documentation](https://github.com/clusterzx/paperless-ai), and [Ollama documentation](https://ollama.com/docs).
+For more advanced configurations, check out the [official Paperless-ngx documentation](https://paperless-ngx.readthedocs.io/) and [Paperless-AI documentation](https://github.com/clusterzx/paperless-ai).

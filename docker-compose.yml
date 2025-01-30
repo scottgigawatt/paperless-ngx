@@ -250,7 +250,7 @@ services:
   ollama:
     # Docker image and container information
     <<: *default-container               # Pull in the default container information
-    image: ollama/ollama:${OLLAMA_TAG}   # Run using the specified tag. For AMD CPU, use 'rocm' tag instead 'latest'
+    image: ollama/ollama:${OLLAMA_TAG}   # Run using the specified tag - use 'rocm' tag for AMD CPU instead of 'latest'
     container_name: ollama-${OLLAMA_TAG} # Append Docker image tag to container name
     hostname: ollama                     # Set the container hostname
 

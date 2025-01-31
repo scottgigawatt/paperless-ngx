@@ -16,10 +16,10 @@ Alternatively, you can use my **[🐳 Docker Compose deployment for Portainer](h
 
 This setup supports:
 
-- **OCR-Powered Search** 🔍 – Scan, search, and retrieve documents with ease.
-- **AI-Powered Categorization** 🤖 – Let Paperless-ngx AI auto-sort and tag your documents.
-- **Office File Support** 📑 – Convert and manage `.docx`, `.pdf`, and other formats.
-- **Synology NAS Friendly** 🏠 – Deploy with DSM Container Manager or Portainer.
+- **OCR-Powered Search** 🔍 - Scan, search, and retrieve documents with ease.
+- **AI-Powered Categorization** 🤖 - Let Paperless-ngx AI auto-sort and tag your documents.
+- **Office File Support** 📑 - Convert and manage `.docx`, `.pdf`, and other formats.
+- **Synology NAS Friendly** 🏠 - Deploy with DSM Container Manager or Portainer.
 
 ---
 

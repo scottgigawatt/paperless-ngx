@@ -1,3 +1,29 @@
+<hr />
+
+<p align="center">
+  <em>📜 Star this repo to keep your docs in line and your chaos in check.</em>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/github/license/scottgigawatt/paperless-ngx?label=Archive%20License&color=blue" alt="License" />
+  <img src="https://img.shields.io/github/last-commit/scottgigawatt/paperless-ngx?label=Last%20Scan&logo=git&color=green" alt="Last Commit" />
+  <img src="https://img.shields.io/github/repo-size/scottgigawatt/paperless-ngx?label=Filing%20Cabinet&color=orange" alt="Repo Size" />
+</p>
+
+<p align="center">─── ⛧ ───</p>
+
+<p align="center">
+    <em>💀 Got rogue PDFs or rebellious receipts? Cast them into the fire and <strong>Enter 🔥HADES🔥</strong>.</em>
+</p>
+
+<p align="center">
+  <a href="https://discord.gg/BpEGzWwGYf">
+    <img src="https://img.shields.io/discord/1403601106315116626?label=%F0%9F%94%A5HADES%F0%9F%94%A5&logo=discord&logoColor=white&color=5865F2" alt="🔥HADES🔥 Discord" />
+  </a>
+</p>
+
+<hr />
+
 # Paperless-ngx 🗃️🤖
 
 Paperless-ngx transforms your mountains of paper clutter into a sleek, searchable, digital archive. Deploy it on your Synology NAS and enjoy the magic of AI-powered document management. No more hunting for receipts like a pirate searching for treasure! 🏴‍☠️📄

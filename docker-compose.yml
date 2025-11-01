@@ -135,11 +135,11 @@ services:
   #
   tika:
     # Docker image and container information
-    <<: *default-container                        # Pull in the default container information
-    image: ghcr.io/paperless-ngx/tika:${TIKA_TAG} # Run using the specified tag
-    container_name: tika-${TIKA_TAG}              # Append Docker image tag to container name
-    hostname: tika                                # Set the container hostname
-    user: ${DEFAULT_UID}:${DEFAULT_GID}           # Set the container user
+    <<: *default-container                   # Pull in the default container information
+    image: docker.io/apache/tika:${TIKA_TAG} # Run using the specified tag
+    container_name: tika-${TIKA_TAG}         # Append Docker image tag to container name
+    hostname: tika                           # Set the container hostname
+    user: ${DEFAULT_UID}:${DEFAULT_GID}      # Set the container user
 
   #
   # Define the 'paperless-ngx' service

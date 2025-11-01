@@ -22,7 +22,7 @@
 #
 # Docker Compose version on the target system
 #
-version: "2.9"
+version: "2.20"
 
 #
 # Setup default properties for all or most containers
@@ -53,11 +53,6 @@ services:
     hostname: redis                     # Set the container hostname
     user: ${DEFAULT_UID}:${DEFAULT_GID} # Set the container user
     read_only: true                     # Set the filesystem to read only
-
-    # Container resource requests and constraints
-    mem_limit: ${REDIS_MEM_LIMIT}             # Set the maximum memory
-    mem_reservation: ${REDIS_MEM_RESERVATION} # Set the initially requested memory
-    cpu_shares: ${REDIS_CPU_SHARES}           # Set relative CPU weight versus other containers
 
     # List of sysctls set for the container
     sysctls:
@@ -92,10 +87,6 @@ services:
     container_name: postgres-${POSTGRES_TAG} # Append Docker image tag to container name
     hostname: postgres                       # Set the container hostname
 
-    # Container resource requests and constraints
-    mem_limit: ${POSTGRES_MEM_LIMIT}   # Set the maximum memory
-    cpu_shares: ${POSTGRES_CPU_SHARES} # Set relative CPU weight versus other containers
-
     # Command used to check container health
     healthcheck:
       test: ["CMD", "pg_isready", "-q", "-d", "paperless", "-U", "${POSTGRES_USER}"] # Check if PostgreSQL is ready
@@ -111,7 +102,7 @@ services:
 
     # Mount host directories into the container
     volumes:
-      - ${POSTGRES_CONFIG_PATH}:/var/lib/postgresql/data:rw # Mount config directory
+      - ${POSTGRES_CONFIG_PATH}:/var/lib/postgresql:rw # Mount config directory
 
   #
   # Define the 'gotenberg' service
@@ -150,10 +141,6 @@ services:
     image: ghcr.io/paperless-ngx/paperless-ngx:${PAPERLESS_TAG} # Run using the specified tag
     container_name: paperless-ngx-${PAPERLESS_TAG}              # Append Docker image tag to container name
     hostname: paperless-ngx                                     # Set the container hostname
-
-    # Container resource requests and constraints
-    mem_limit: ${PAPERLESS_MEM_LIMIT}   # Set the maximum memory
-    cpu_shares: ${PAPERLESS_CPU_SHARES} # Set relative CPU weight versus other containers
 
     # Command used to check container health
     healthcheck:

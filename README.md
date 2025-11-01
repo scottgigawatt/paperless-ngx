@@ -228,4 +228,4 @@ Or reboot your NAS for the changes to take effect.
 
 Congratulations! 🎊 You've set up **Paperless-ngx, and Paperless-AI** on your Synology NAS. Now you can manage documents efficiently using AI models. 🚀🗃️🤖
 
-For more advanced configurations, check out the [official Paperless-ngx documentation](https://paperless-ngx.readthedocs.io/) and [Paperless-AI documentation](https://github.com/clusterzx/paperless-ai).
+For more advanced configurations, check out the [official Paperless-ngx documentation](https://docs.paperless-ngx.com) and [Paperless-AI documentation](https://clusterzx.github.io/paperless-ai/).

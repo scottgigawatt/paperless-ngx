@@ -185,6 +185,8 @@ Paperless upgrades can contain database migrations and behavioral changes.
   invalidates sessions and signed tokens.
 - Review removed or renamed environment settings before changing a major image
   version.
+- Keep `test/check-env.sh` synchronized with the official migration guide when
+  upstream removes, renames, or restricts configuration settings.
 - Expect the first v3 start to rebuild the full-text search index.
 - Do not infer production migration success from a valid Compose render. Runtime
   logs and service health must also be checked on the deployment host.

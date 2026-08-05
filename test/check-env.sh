@@ -14,6 +14,8 @@
 #   - Rejects missing and known placeholder credentials.
 #   - Enforces a minimum Paperless signing-key length.
 #   - Rejects the example Redis URL and public Paperless hostname.
+#   - Rejects removed, renamed, or deprecated Paperless-ngx v3 settings.
+#   - Validates the explicit v3 OCR and archive-generation policies.
 #   - Keeps the PostgreSQL image major version and data target synchronized.
 #   - Reports every detected problem in one validation pass.
 #
@@ -30,6 +32,18 @@ ENV_FILE=${1:-${ENV_FILE:-.env}}
 MINIMUM_SECRET_KEY_LENGTH=32
 POSTGRES_LEGACY_DATA_TARGET=/var/lib/postgresql/data
 POSTGRES_MODERN_DATA_TARGET=/var/lib/postgresql
+PAPERLESS_V3_LEGACY_KEYS="PAPERLESS_CONSUMER_POLLING \
+    PAPERLESS_CONSUMER_INOTIFY_DELAY \
+    PAPERLESS_CONSUMER_POLLING_DELAY \
+    PAPERLESS_CONSUMER_POLLING_RETRY_COUNT \
+    PAPERLESS_CONSUMER_BARCODE_SCANNER \
+    PAPERLESS_DBSSLMODE \
+    PAPERLESS_DBSSLROOTCERT \
+    PAPERLESS_DBSSLCERT \
+    PAPERLESS_DBSSLKEY \
+    PAPERLESS_DB_POOLSIZE \
+    PAPERLESS_DB_TIMEOUT \
+    PAPERLESS_OCR_SKIP_ARCHIVE_FILE"
 
 # This policy contains setting names only, never credential values.
 REQUIRED_SECRET_KEYS="REDIS_PASSWORD POSTGRES_PASSWORD PAPERLESS_ADMIN_PASSWORD PAPERLESS_SECRET_KEY"  # pragma: allowlist secret
@@ -86,6 +100,15 @@ read_value() {
 }
 
 #
+# Return success when the environment file declares an exact setting name.
+# Never read or print the setting value during this presence check.
+#
+has_key() {
+    has_key_name=$1
+    grep -q "^${has_key_name}=" "${ENV_FILE}"
+}
+
+#
 # Reject an absent environment file before attempting any setting checks.
 #
 if [ ! -f "${ENV_FILE}" ]; then
@@ -138,6 +161,67 @@ paperless_url=$(read_value PAPERLESS_URL)
 case "${paperless_url}" in
     ""|*yourname.synology.me*)
         report_failure "PAPERLESS_URL is missing or still uses the example hostname."
+        ;;
+esac
+
+#
+# Reject settings removed, renamed, or deprecated by Paperless-ngx v3. Report
+# only setting names and replacement guidance, never configured values.
+#
+for legacy_key in ${PAPERLESS_V3_LEGACY_KEYS}; do
+    if has_key "${legacy_key}"; then
+        case "${legacy_key}" in
+            PAPERLESS_CONSUMER_POLLING)
+                replacement="use PAPERLESS_CONSUMER_POLLING_INTERVAL"
+                ;;
+            PAPERLESS_CONSUMER_INOTIFY_DELAY|PAPERLESS_CONSUMER_POLLING_DELAY)
+                replacement="use PAPERLESS_CONSUMER_STABILITY_DELAY"
+                ;;
+            PAPERLESS_CONSUMER_POLLING_RETRY_COUNT)
+                replacement="remove it; v3 tracks file stability automatically"
+                ;;
+            PAPERLESS_CONSUMER_BARCODE_SCANNER)
+                replacement="remove it; v3 uses zxing-cpp exclusively"
+                ;;
+            PAPERLESS_DBSSLMODE|PAPERLESS_DBSSLROOTCERT|PAPERLESS_DBSSLCERT|PAPERLESS_DBSSLKEY|PAPERLESS_DB_POOLSIZE|PAPERLESS_DB_TIMEOUT)
+                replacement="move the option into PAPERLESS_DB_OPTIONS"
+                ;;
+            PAPERLESS_OCR_SKIP_ARCHIVE_FILE)
+                replacement="use PAPERLESS_ARCHIVE_FILE_GENERATION"
+                ;;
+        esac
+
+        report_failure "${legacy_key} is unsupported by this v3 deployment policy; ${replacement}."
+    fi
+done
+
+#
+# Require the database engine owned by this stack and validate the allowed v3
+# OCR and archive-generation policies before Compose interpolates them.
+#
+paperless_dbengine=$(read_value PAPERLESS_DBENGINE)
+
+if [ "${paperless_dbengine}" != "postgresql" ]; then
+    report_failure "PAPERLESS_DBENGINE must be postgresql for this deployment."
+fi
+
+paperless_ocr_mode=$(read_value PAPERLESS_OCR_MODE)
+
+case "${paperless_ocr_mode}" in
+    auto|redo|force|off)
+        ;;
+    *)
+        report_failure "PAPERLESS_OCR_MODE must be auto, redo, force, or off."
+        ;;
+esac
+
+paperless_archive_file_generation=$(read_value PAPERLESS_ARCHIVE_FILE_GENERATION)
+
+case "${paperless_archive_file_generation}" in
+    auto|always|never)
+        ;;
+    *)
+        report_failure "PAPERLESS_ARCHIVE_FILE_GENERATION must be auto, always, or never."
         ;;
 esac
 

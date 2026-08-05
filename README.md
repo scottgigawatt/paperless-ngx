@@ -278,6 +278,8 @@ Do not paste the generated value into an issue or log.
 ### The Supreme Archivist Is Unwell After an Upgrade
 
 - Check that the prior v2 release was exactly `2.20.15` before v3 migration.
+- Review the explicit OCR and archive-generation policies and remove settings
+  retired or renamed by v3; `make check-env` identifies known obsolete keys.
 - Inspect migration and index-rebuild output with `make logs`.
 - Review the [official v3 migration guide](https://docs.paperless-ngx.com/migration-v3/).
 - Restore the verified pre-upgrade backup if the documented rollback boundary is

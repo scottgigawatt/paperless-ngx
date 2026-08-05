@@ -79,7 +79,7 @@ services:
 
     # Report healthy when the authenticated broker responds
     healthcheck:
-      test:                                    # Ping Redis through the bundled client
+      test:  # Ping Redis through the bundled client
         - CMD
         - redis-cli
         - ping
@@ -116,7 +116,7 @@ services:
 
     # Report healthy when the configured database accepts connections
     healthcheck:
-      test:                                       # Query PostgreSQL readiness without printing secrets
+      test:  # Query PostgreSQL readiness without printing secrets
         - CMD
         - pg_isready
         - -q
@@ -149,7 +149,7 @@ services:
 
     # Report healthy when the conversion API responds successfully
     healthcheck:
-      test:                                                # Request the upstream application health endpoint
+      test:  # Request the upstream application health endpoint
         - CMD
         - curl
         - -fsS
@@ -205,15 +205,21 @@ services:
       PAPERLESS_CSRF_TRUSTED_ORIGINS: ${PAPERLESS_CSRF_TRUSTED_ORIGINS}  # Trust the configured reverse proxy origin
       PAPERLESS_SECRET_KEY: ${PAPERLESS_SECRET_KEY}                      # Required stable key for signatures and sessions
 
-      # Initial administrator and document-processing behavior
-      PAPERLESS_ADMIN_USER: ${PAPERLESS_ADMIN_USER}                                                        # Initial administrator username
-      PAPERLESS_ADMIN_PASSWORD: ${PAPERLESS_ADMIN_PASSWORD}                                                # Initial administrator password
+      # Initial administrator
+      PAPERLESS_ADMIN_USER: ${PAPERLESS_ADMIN_USER}          # Initial administrator username
+      PAPERLESS_ADMIN_PASSWORD: ${PAPERLESS_ADMIN_PASSWORD}  # Initial administrator password
+
+      # Document retention and naming behavior
       PAPERLESS_EMPTY_TRASH_DIR: ${PAPERLESS_EMPTY_TRASH_DIR}                                              # Trash directory relative to media root
       PAPERLESS_CONSUMER_DELETE_DUPLICATES: ${PAPERLESS_CONSUMER_DELETE_DUPLICATES}                        # Remove duplicate consume inputs
       PAPERLESS_FILENAME_FORMAT: '{{ created_year }}/{{ correspondent }}/{{ document_type }}/{{ title }}'  # Archive path template
-      PAPERLESS_OCR_LANGUAGE: ${PAPERLESS_OCR_LANGUAGE}                                                    # Primary OCR language
-      PAPERLESS_OCR_ROTATE_PAGES_THRESHOLD: ${PAPERLESS_OCR_ROTATE_PAGES_THRESHOLD}                        # Rotation confidence threshold
-      PAPERLESS_TASK_WORKERS: ${PAPERLESS_TASK_WORKERS}                                                    # Number of background task workers
+
+      # OCR, archive generation, and background processing
+      PAPERLESS_OCR_LANGUAGE: ${PAPERLESS_OCR_LANGUAGE}                              # Primary OCR language
+      PAPERLESS_OCR_MODE: ${PAPERLESS_OCR_MODE}                                      # Apply the v3 automatic OCR policy
+      PAPERLESS_ARCHIVE_FILE_GENERATION: ${PAPERLESS_ARCHIVE_FILE_GENERATION}        # Create archives under the v3 automatic policy
+      PAPERLESS_OCR_ROTATE_PAGES_THRESHOLD: ${PAPERLESS_OCR_ROTATE_PAGES_THRESHOLD}  # Rotation confidence threshold
+      PAPERLESS_TASK_WORKERS: ${PAPERLESS_TASK_WORKERS}                              # Number of background task workers
 
       # Office document parsing and conversion
       PAPERLESS_TIKA_ENABLED: ${PAPERLESS_TIKA_ENABLED}                        # Enable Office document support
@@ -234,7 +240,7 @@ services:
 
     # Report healthy when the web application responds successfully
     healthcheck:
-      test:                                                # Request the local application endpoint
+      test:  # Request the local application endpoint
         - CMD
         - curl
         - -fsS
@@ -289,7 +295,7 @@ services:
 
     # Report healthy when Paperless-AI is configured and its database responds
     healthcheck:
-      test:                                                   # Request the upstream application health endpoint
+      test:  # Request the upstream application health endpoint
         - CMD
         - curl
         - -fsS

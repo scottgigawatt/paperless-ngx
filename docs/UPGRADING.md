@@ -128,10 +128,42 @@ starting v3:
 - The Whoosh index is replaced by Tantivy and is rebuilt on first startup.
 - Existing task history is cleared during the upgrade.
 - Reverse-proxy login rate limiting may require trusted-proxy settings.
+- Saved searches that relied on unqualified note or custom-field matches may
+  need explicit Tantivy field paths after the automatic migration.
+- OpenID Connect providers may need an explicit `token_auth_method` if the
+  callback begins returning `invalid_client`.
+- Mail rules with `maximum_age` values above `32767` are clamped during the
+  database migration.
 - Older x86 hardware must meet the new `x86-64-v2` CPU baseline.
 
 Read the complete [official v3 migration guide](https://docs.paperless-ngx.com/migration-v3/)
 for the exact mappings and action items.
+
+### Retire the v2 Forms Before They Haunt Payroll 👻📋
+
+`make check-env` rejects the v2 settings below because Paperless-ngx v3 renamed,
+removed, or deprecated them. Update `.env` before attempting the migration:
+
+| Legacy v2 setting | v3 action |
+| ----------------- | --------- |
+| `PAPERLESS_CONSUMER_POLLING` | Use `PAPERLESS_CONSUMER_POLLING_INTERVAL` |
+| `PAPERLESS_CONSUMER_INOTIFY_DELAY` | Use `PAPERLESS_CONSUMER_STABILITY_DELAY` |
+| `PAPERLESS_CONSUMER_POLLING_DELAY` | Use `PAPERLESS_CONSUMER_STABILITY_DELAY` |
+| `PAPERLESS_CONSUMER_POLLING_RETRY_COUNT` | Remove it; v3 tracks file stability automatically |
+| `PAPERLESS_CONSUMER_BARCODE_SCANNER` | Remove it; v3 uses `zxing-cpp` exclusively |
+| `PAPERLESS_DBSSLMODE`, `PAPERLESS_DBSSLROOTCERT`, `PAPERLESS_DBSSLCERT`, `PAPERLESS_DBSSLKEY`, `PAPERLESS_DB_POOLSIZE`, `PAPERLESS_DB_TIMEOUT` | Move the equivalent options into `PAPERLESS_DB_OPTIONS` |
+| `PAPERLESS_OCR_SKIP_ARCHIVE_FILE` | Use `PAPERLESS_ARCHIVE_FILE_GENERATION` |
+
+The example configuration explicitly sets `PAPERLESS_OCR_MODE=auto` and
+`PAPERLESS_ARCHIVE_FILE_GENERATION=auto`. These preserve upstream v3's automatic
+decision-making while making the deployment policy reviewable instead of
+leaving it in an invisible desk drawer.
+
+> [!IMPORTANT]
+> Do not mechanically rename a retired setting without reading its v3 behavior.
+> The new stability detector, database options mapping, and archive-generation
+> policy are not all one-for-one substitutions. HADES has rejected Form 27-B,
+> "It Had Basically the Same Name," for being how incidents get promoted.
 
 ## The Optional Oracle Is on Administrative Leave 🔮
 

@@ -1,0 +1,42 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "helpers:pinGitHubActionDigests"
+  ],
+  "timezone": "America/New_York",
+  "schedule": ["before 8am on monday"],
+  "dependencyDashboard": true,
+  "assignees": ["scottgigawatt"],
+  "reviewers": ["scottgigawatt"],
+  "enabledManagers": [
+    "custom.regex",
+    "docker-compose",
+    "github-actions",
+    "pre-commit"
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^example\\.env$/"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n[A-Z0-9_]+_TAG=\"\\$\\{[A-Z0-9_]+_TAG:-(?<currentValue>[^}]+)\\}\""
+      ],
+      "versioningTemplate": "docker"
+    }
+  ],
+  "packageRules": [
+    {
+      "groupName": "GitHub Actions",
+      "matchManagers": ["github-actions"]
+    },
+    {
+      "groupName": "Compose images",
+      "matchManagers": ["custom.regex", "docker-compose"]
+    },
+    {
+      "groupName": "Pre-commit hooks",
+      "matchManagers": ["pre-commit"]
+    }
+  ]
+}

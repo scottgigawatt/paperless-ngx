@@ -1,0 +1,42 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# validate-pr.yml: Validate the Paperless-ngx Compose deployment and repository.
+#
+
+name: "Audit the Filing Cabinet 🧪🗃️"
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-pr:
+    name: "Inspect Every Drawer 🔎"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: "Retrieve the Archive Map 🗺️"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
+        with:
+          persist-credentials: false
+
+      - name: "Render the Example Cabinet 📐"
+        run: make validate
+
+      - name: "Dust Every Configuration Shelf 🧹"
+        uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd  # v3.0.1

@@ -1,243 +1,182 @@
 ---
 #
-# docker-compose.yml: Docker Utilities for Paperless-ngx contains a Docker Compose
-# configuration tailored for Synology NAS environments, simplifying the setup process
-# for deploying Paperless-ngx, a document management system with support for Office
-# files, OCR capabilities, and AI-powered document processing.
+# Copyright 2025-2026 Scott Gigawatt
 #
-# Services Included:
-#   - Redis: Provides fast, in-memory data storage for caching and message queuing.
-#   - PostgreSQL: Stores and manages document metadata and user information.
-#   - Gotenberg: Handles Office file conversion for better compatibility.
-#   - Apache Tika: Extracts metadata and text from documents for indexing and search.
-#   - Paperless-ngx: The core application for document management, digitization, and OCR processing.
-#   - Paperless-ngx AI: AI-powered document categorization and processing for automation and efficiency.
+# Licensed under the Apache License, Version 2.0.
 #
-# This project is based on the guides provided by Lixandru Marius Bogdan.
-# For detailed instructions and additional configurations, visit:
-# - Paperless-ngx Setup: https://mariushosting.com/synology-install-paperless-ngx-with-office-files-support/
-# - Paperless-ngx AI Setup: https://mariushosting.com/how-to-install-paperless-ai-on-your-synology-nas/
+# docker-compose.yml: Single-file Paperless-ngx deployment for Docker Compose,
+#                     Synology Container Manager, and Portainer.
 #
 
 #
-# Docker Compose version on the target system
+# Shared defaults for long-running services.
 #
-version: "2.20"
+x-default-container: &default-container
+  pull_policy: always
+  restart: unless-stopped
+  security_opt:
+    - no-new-privileges:true
+  logging:
+    driver: json-file
+    options:
+      max-size: ${LOG_MAX_SIZE}
+      max-file: ${LOG_MAX_FILE}
 
-#
-# Setup default properties for all or most containers
-#
-x-default-container: &default-container             # YAML anchor for default container
-  pull_policy: always                               # Ensure that the image is always pulled
-  restart: on-failure:5                             # Restart the container on failure up to 5 times
-  security_opt:                                     # Configure container security options
-    - no-new-privileges:true                        # Disallow addition of additional privileges
-  logging:                                          # Configure container logging options
-    driver: "json-file"                             # Use JSON file logging driver
-    options:                                        # Add container logging options
-      max-size: ${LOG_MAX_SIZE}                     # Maximum file size for logs files
-      max-file: ${LOG_MAX_FILE}                     # Maximum number of log files to retain
-
-#
-# Define the services section
-#
 services:
   #
-  # Define the 'redis' service
+  # Redis-compatible message broker used by Paperless background workers.
   #
   redis:
-    # Docker image and container information
-    <<: *default-container              # Pull in the default container information
-    image: redis:${REDIS_TAG}           # Run using the specified tag
-    container_name: redis-${REDIS_TAG}  # Append Docker image tag to container name
-    hostname: redis                     # Set the container hostname
-    user: ${DEFAULT_UID}:${DEFAULT_GID} # Set the container user
-    read_only: true                     # Set the filesystem to read only
-
-    # List of sysctls set for the container
+    <<: *default-container
+    image: docker.io/library/redis:${REDIS_TAG}
+    user: ${DEFAULT_UID}:${DEFAULT_GID}
+    read_only: true
     sysctls:
-      - net.core.somaxconn=512 # Increase the number of incoming connections backlog
-
-    # Command used to start the container
+      - net.core.somaxconn=512
     command:
-      - /bin/sh                                       # Start a shell process inside the container
-      - -c                                            # Execute the following command string
-      - redis-server --requirepass ${REDIS_PASSWORD}  # Start Redis with password authentication
-
-    # Command used to check container health
+      - redis-server
+      - --requirepass
+      - ${REDIS_PASSWORD}
     healthcheck:
-      test: ["CMD-SHELL", "redis-cli ping || exit 1"] # Use redis-cli ping command for healthcheck
-
-    # Define the container environment
+      test: ["CMD", "redis-cli", "ping"]
+      timeout: ${REDIS_HEALTHCHECK_TIMEOUT}
+      interval: ${REDIS_HEALTHCHECK_INTERVAL}
+      retries: ${REDIS_HEALTHCHECK_RETRIES}
     environment:
-      TZ: ${TZ}                         # Set the timezone
-      REDIS_PASSWORD: ${REDIS_PASSWORD} # Set the redis server password
-
-    # Mount host directories into the container
+      TZ: ${TZ}
+      REDISCLI_AUTH: ${REDIS_PASSWORD}
     volumes:
-      - ${REDIS_CONFIG_PATH}:/data:rw # Mount config directory
+      - ${REDIS_CONFIG_PATH}:/data:rw
 
   #
-  # Define the postgres service
+  # PostgreSQL database for Paperless metadata and application state.
+  # The container data target differs between PostgreSQL 17 and 18+.
   #
   postgres:
-    # Docker image and container information
-    <<: *default-container                   # Pull in the default container information
-    image: postgres:${POSTGRES_TAG}          # Run using the specified tag
-    container_name: postgres-${POSTGRES_TAG} # Append Docker image tag to container name
-    hostname: postgres                       # Set the container hostname
-
-    # Command used to check container health
+    <<: *default-container
+    image: docker.io/library/postgres:${POSTGRES_TAG}
     healthcheck:
-      test: ["CMD", "pg_isready", "-q", "-d", "paperless", "-U", "${POSTGRES_USER}"] # Check if PostgreSQL is ready
-      timeout: ${POSTGRES_HEALTHCHECK_TIMEOUT}                                       # Fail if it exceeds this duration
-      interval: ${POSTGRES_HEALTHCHECK_INTERVAL}                                     # Run the check at this interval
-      retries: 10                                                                    # Mark as unhealthy after 10 failures
-
-    # Define the container environment
+      test: ["CMD", "pg_isready", "-q", "-d", "${POSTGRES_DB}", "-U", "${POSTGRES_USER}"]
+      timeout: ${POSTGRES_HEALTHCHECK_TIMEOUT}
+      interval: ${POSTGRES_HEALTHCHECK_INTERVAL}
+      retries: ${POSTGRES_HEALTHCHECK_RETRIES}
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}             # Database name
-      POSTGRES_USER: ${POSTGRES_USER}         # Database user
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD} # Database password
-
-    # Mount host directories into the container
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      - ${POSTGRES_CONFIG_PATH}:/var/lib/postgresql:rw # Mount config directory
+      - ${POSTGRES_CONFIG_PATH}:${POSTGRES_DATA_TARGET}:rw
 
   #
-  # Define the 'gotenberg' service
+  # Gotenberg converts Office and email content into PDFs for Paperless.
   #
   gotenberg:
-    # Docker image and container information
-    <<: *default-container                      # Pull in the default container information
-    image: gotenberg/gotenberg:${GOTENBERG_TAG} # Run using the specified tag
-    container_name: gotenberg-${GOTENBERG_TAG}  # Append Docker image tag to container name
-    hostname: gotenberg                         # Set the container hostname
-    user: ${DEFAULT_UID}:${DEFAULT_GID}         # Set the container user
-
-    # Command used to start the container
+    <<: *default-container
+    image: docker.io/gotenberg/gotenberg:${GOTENBERG_TAG}
     command:
-      - "gotenberg"                            # Start the Gotenberg document conversion service
-      - "--chromium-disable-javascript=true"   # Disable JavaScript in Chromium for security and performance
-      - "--chromium-allow-list=file:///tmp/.*" # Restrict Chromium file access to /tmp/ for security
+      - gotenberg
+      - --chromium-disable-javascript=true
+      - --chromium-allow-list=file:///tmp/.*
 
   #
-  # Define the 'tika' service
+  # Apache Tika extracts text and metadata from Office documents.
   #
   tika:
-    # Docker image and container information
-    <<: *default-container                   # Pull in the default container information
-    image: docker.io/apache/tika:${TIKA_TAG} # Run using the specified tag
-    container_name: tika-${TIKA_TAG}         # Append Docker image tag to container name
-    hostname: tika                           # Set the container hostname
-    user: ${DEFAULT_UID}:${DEFAULT_GID}      # Set the container user
+    <<: *default-container
+    image: docker.io/apache/tika:${TIKA_TAG}
 
   #
-  # Define the 'paperless-ngx' service
+  # Paperless-ngx application, consumer, scheduler, and task workers.
   #
   paperless-ngx:
-    # Docker image and container information
-    <<: *default-container                                      # Pull in the default container information
-    image: ghcr.io/paperless-ngx/paperless-ngx:${PAPERLESS_TAG} # Run using the specified tag
-    container_name: paperless-ngx-${PAPERLESS_TAG}              # Append Docker image tag to container name
-    hostname: paperless-ngx                                     # Set the container hostname
-
-    # Command used to check container health
+    <<: *default-container
+    image: ghcr.io/paperless-ngx/paperless-ngx:${PAPERLESS_TAG}
     healthcheck:
-      test: ["CMD", "curl", "-fs", "-S", "--max-time", "2", "http://localhost:8000"] # Ensure the web UI is responsive
-      timeout: ${PAPERLESS_HEALTHCHECK_TIMEOUT}                                      # Fail if it exceeds this duration
-      interval: ${PAPERLESS_HEALTHCHECK_INTERVAL}                                    # Run the check at this interval
-      retries: 5                                                                     # Mark as unhealthy after 5 failures
-
-    # Define the container environment
+      test: ["CMD", "curl", "-fsS", "--max-time", "2", "http://localhost:8000"]
+      timeout: ${PAPERLESS_HEALTHCHECK_TIMEOUT}
+      interval: ${PAPERLESS_HEALTHCHECK_INTERVAL}
+      start_period: ${PAPERLESS_HEALTHCHECK_START_PERIOD}
+      retries: ${PAPERLESS_HEALTHCHECK_RETRIES}
     environment:
-      PAPERLESS_REDIS: ${PAPERLESS_REDIS}                                                                 # Redis connection string for caching and task queuing
-      PAPERLESS_DBENGINE: ${PAPERLESS_DBENGINE}                                                           # Database engine (e.g., PostgreSQL)
-      PAPERLESS_DBHOST: ${PAPERLESS_DBHOST}                                                               # Database hostname
-      PAPERLESS_DBNAME: ${POSTGRES_DB}                                                                    # Database name
-      PAPERLESS_DBUSER: ${POSTGRES_USER}                                                                  # Database username
-      PAPERLESS_DBPASS: ${POSTGRES_PASSWORD}                                                              # Database password
-      PAPERLESS_EMPTY_TRASH_DIR: ${PAPERLESS_EMPTY_TRASH_DIR}                                             # Enable/disable automatic trash cleanup
-      PAPERLESS_FILENAME_FORMAT: '{{ created_year }}/{{ correspondent }}/{{ document_type }}/{{ title }}' # Document storage format
-      PAPERLESS_OCR_ROTATE_PAGES_THRESHOLD: ${PAPERLESS_OCR_ROTATE_PAGES_THRESHOLD}                       # Threshold for automatic page rotation in OCR
-      PAPERLESS_TASK_WORKERS: ${PAPERLESS_TASK_WORKERS}                                                   # Number of worker threads for background tasks
-      USERMAP_UID: ${DEFAULT_UID}                                                                         # User ID mapping inside the container
-      USERMAP_GID: ${DEFAULT_GID}                                                                         # Group ID mapping inside the container
-      PAPERLESS_TIME_ZONE: ${TZ}                                                                          # Time zone setting
-      PAPERLESS_ADMIN_USER: ${PAPERLESS_ADMIN_USER}                                                       # Admin username for web interface
-      PAPERLESS_ADMIN_PASSWORD: ${PAPERLESS_ADMIN_PASSWORD}                                               # Admin password for web interface
-      PAPERLESS_URL: ${PAPERLESS_URL}                                                                     # External URL for Paperless instance
-      PAPERLESS_CSRF_TRUSTED_ORIGINS: ${PAPERLESS_CSRF_TRUSTED_ORIGINS}                                   # Trusted origins for CSRF protection
-      PAPERLESS_OCR_LANGUAGE: ${PAPERLESS_OCR_LANGUAGE}                                                   # Default OCR language (e.g., eng for English)
-      PAPERLESS_TIKA_ENABLED: ${PAPERLESS_TIKA_ENABLED}                                                   # Toggle Tika for text extraction
-      PAPERLESS_TIKA_GOTENBERG_ENDPOINT: ${PAPERLESS_TIKA_GOTENBERG_ENDPOINT}                             # URL for Gotenberg (PDF conversion)
-      PAPERLESS_TIKA_ENDPOINT: ${PAPERLESS_TIKA_ENDPOINT}                                                 # URL for Apache Tika (text extraction)
+      # Broker and database connectivity.
+      PAPERLESS_REDIS: ${PAPERLESS_REDIS}
+      PAPERLESS_DBENGINE: ${PAPERLESS_DBENGINE}
+      PAPERLESS_DBHOST: ${PAPERLESS_DBHOST}
+      PAPERLESS_DBNAME: ${POSTGRES_DB}
+      PAPERLESS_DBUSER: ${POSTGRES_USER}
+      PAPERLESS_DBPASS: ${POSTGRES_PASSWORD}
 
-    # Define the host and container ports
+      # Runtime identity, URL, and required signing secret.
+      USERMAP_UID: ${DEFAULT_UID}
+      USERMAP_GID: ${DEFAULT_GID}
+      PAPERLESS_TIME_ZONE: ${TZ}
+      PAPERLESS_URL: ${PAPERLESS_URL}
+      PAPERLESS_CSRF_TRUSTED_ORIGINS: ${PAPERLESS_CSRF_TRUSTED_ORIGINS}
+      PAPERLESS_SECRET_KEY: ${PAPERLESS_SECRET_KEY}
+
+      # Initial administrator and document-processing behavior.
+      PAPERLESS_ADMIN_USER: ${PAPERLESS_ADMIN_USER}
+      PAPERLESS_ADMIN_PASSWORD: ${PAPERLESS_ADMIN_PASSWORD}
+      PAPERLESS_EMPTY_TRASH_DIR: ${PAPERLESS_EMPTY_TRASH_DIR}
+      PAPERLESS_CONSUMER_DELETE_DUPLICATES: ${PAPERLESS_CONSUMER_DELETE_DUPLICATES}
+      PAPERLESS_FILENAME_FORMAT: '{{ created_year }}/{{ correspondent }}/{{ document_type }}/{{ title }}'
+      PAPERLESS_OCR_LANGUAGE: ${PAPERLESS_OCR_LANGUAGE}
+      PAPERLESS_OCR_ROTATE_PAGES_THRESHOLD: ${PAPERLESS_OCR_ROTATE_PAGES_THRESHOLD}
+      PAPERLESS_TASK_WORKERS: ${PAPERLESS_TASK_WORKERS}
+
+      # Office document parsing and conversion.
+      PAPERLESS_TIKA_ENABLED: ${PAPERLESS_TIKA_ENABLED}
+      PAPERLESS_TIKA_GOTENBERG_ENDPOINT: ${PAPERLESS_TIKA_GOTENBERG_ENDPOINT}
+      PAPERLESS_TIKA_ENDPOINT: ${PAPERLESS_TIKA_ENDPOINT}
     ports:
-      - ${PAPERLESS_WEBUI_PORT}:8000 # Paperless web UI port
-
-    # Mount host directories into the container
+      - "${PAPERLESS_WEBUI_PORT}:8000"
     volumes:
-      - ${PAPERLESS_DATA_PATH}:/usr/src/paperless/data:rw       # Paperless data config path
-      - ${PAPERLESS_MEDIA_PATH}:/usr/src/paperless/media:rw     # Paperless media config path
-      - ${PAPERLESS_EXPORT_PATH}:/usr/src/paperless/export:rw   # Paperless export config path
-      - ${PAPERLESS_CONSUME_PATH}:/usr/src/paperless/consume:rw # Paperless consume config path
-      - ${PAPERLESS_TRASH_PATH}:/usr/src/paperless/trash:rw     # Paperless trash config path
-
-    # Specify container service dependencies
+      - ${PAPERLESS_DATA_PATH}:/usr/src/paperless/data:rw
+      - ${PAPERLESS_MEDIA_PATH}:/usr/src/paperless/media:rw
+      - ${PAPERLESS_EXPORT_PATH}:/usr/src/paperless/export:rw
+      - ${PAPERLESS_CONSUME_PATH}:/usr/src/paperless/consume:rw
+      - ${PAPERLESS_TRASH_PATH}:/usr/src/paperless/trash:rw
     depends_on:
       postgres:
-        condition: service_healthy # Wait for database healthcheck to report healthy
+        condition: service_healthy
       redis:
-        condition: service_healthy # Wait for redis healthcheck to report healthy
+        condition: service_healthy
       tika:
-        condition: service_started # Wait for tika service to start successfully
+        condition: service_started
       gotenberg:
-        condition: service_started # Wait for gotenberg service to start successfully
+        condition: service_started
 
   #
-  # Define the 'paperless-ai' service
+  # Optional Paperless-AI companion service.
   #
   paperless-ai:
-    # Docker image and container information
-    <<: *default-container                              # Pull in the default container information
-    image: clusterzx/paperless-ai:${PAPERLESS_AI_TAG}   # Run using the specified tag
-    container_name: paperlessngx-ai-${PAPERLESS_AI_TAG} # Append Docker image tag to container name
-    hostname: paperless-ai                              # Set the container hostname
-
-    # Command used to check container health
+    <<: *default-container
+    image: docker.io/clusterzx/paperless-ai:${PAPERLESS_AI_TAG}
+    cap_drop:
+      - ALL
     healthcheck:
-      test: timeout 10s bash -c ':> /dev/tcp/127.0.0.1/3000' || exit 1 # Check if port 3000 is open
-      timeout: ${PAPERLESS_AI_HEALTHCHECK_TIMEOUT}                     # Fail if it exceeds this duration
-      interval: ${PAPERLESS_AI_HEALTHCHECK_INTERVAL}                   # Run the check at this interval
-      start_period: ${PAPERLESS_AI_HEALTHCHECK_START_PERIOD}           # Grace period before checks start
-      retries: 3                                                       # Mark as unhealthy after 3 failures
-
-
-    # Define the host and container ports
+      test: ["CMD-SHELL", "timeout 10s bash -c ':> /dev/tcp/127.0.0.1/3000' || exit 1"]
+      timeout: ${PAPERLESS_AI_HEALTHCHECK_TIMEOUT}
+      interval: ${PAPERLESS_AI_HEALTHCHECK_INTERVAL}
+      start_period: ${PAPERLESS_AI_HEALTHCHECK_START_PERIOD}
+      retries: ${PAPERLESS_AI_HEALTHCHECK_RETRIES}
+    environment:
+      PUID: ${DEFAULT_UID}
+      PGID: ${DEFAULT_GID}
     ports:
-      - ${PAPERLESS_AI_WEBUI_PORT}:3000 # Paperless AI web UI port
-
-    # Mount host directories into the container
+      - "${PAPERLESS_AI_WEBUI_PORT}:3000"
     volumes:
-      - ${PAPERLESS_AI_CONFIG_PATH}:/app/data:rw # Mount config directory
-
-    # Specify container service dependencies
+      - ${PAPERLESS_AI_CONFIG_PATH}:/app/data:rw
     depends_on:
       paperless-ngx:
-        condition: service_healthy # Wait for paperless-ngx service healthcheck to report healthy
+        condition: service_healthy
 
-#
-# Define the networks section
-#
 networks:
-  # Configure the default network
   default:
-    name: ${COMPOSE_PROJECT_NAME} # Use the name of the compose project
-    ipam:                         # IP Address Management
-      driver: default             # Use the default driver
+    name: ${COMPOSE_PROJECT_NAME}
+    ipam:
+      driver: default
       config:
-        - subnet: ${COMPOSE_NETWORK_SUBNET}     # Subnet in CIDR format that represents a network segment
-          ip_range: ${COMPOSE_NETWORK_IP_RANGE} # Range of IPs from which to allocate container IPs
-          gateway: ${COMPOSE_NETWORK_GATEWAY}   # Gateway for the master subnet
+        - subnet: ${COMPOSE_NETWORK_SUBNET}
+          ip_range: ${COMPOSE_NETWORK_IP_RANGE}
+          gateway: ${COMPOSE_NETWORK_GATEWAY}

@@ -1,42 +1,53 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended",
-    "helpers:pinGitHubActionDigests"
-  ],
-  "timezone": "America/New_York",
-  "schedule": ["before 8am on monday"],
-  "dependencyDashboard": true,
-  "assignees": ["scottgigawatt"],
-  "reviewers": ["scottgigawatt"],
-  "enabledManagers": [
-    "custom.regex",
-    "docker-compose",
-    "github-actions",
-    "pre-commit"
-  ],
-  "customManagers": [
-    {
-      "customType": "regex",
-      "managerFilePatterns": ["/^example\\.env$/"],
-      "matchStrings": [
-        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n[A-Z0-9_]+_TAG=\"\\$\\{[A-Z0-9_]+_TAG:-(?<currentValue>[^}]+)\\}\""
-      ],
-      "versioningTemplate": "docker"
-    }
-  ],
-  "packageRules": [
-    {
-      "groupName": "GitHub Actions",
-      "matchManagers": ["github-actions"]
-    },
-    {
-      "groupName": "Compose images",
-      "matchManagers": ["custom.regex", "docker-compose"]
-    },
-    {
-      "groupName": "Pre-commit hooks",
-      "matchManagers": ["pre-commit"]
-    }
-  ]
+    // Renovate schema and shared safe defaults.
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": [
+        "config:recommended",
+        "helpers:pinGitHubActionDigests"
+    ],
+
+    // Keep dependency work predictable for a single-maintainer repository.
+    "timezone": "America/New_York",
+    "schedule": ["before 8am on monday"],
+    "dependencyDashboard": true,
+    "assignees": ["scottgigawatt"],
+    "reviewers": ["scottgigawatt"],
+
+    // Renovate owns the repository's Compose, workflow, and hook updates.
+    "enabledManagers": [
+        "custom.regex",
+        "docker-compose",
+        "github-actions",
+        "pre-commit"
+    ],
+
+    // Track image versions defined in example.env instead of directly in YAML.
+    "customManagers": [
+        {
+            "customType": "regex",
+            "managerFilePatterns": [
+                "/^example\\.env$/"
+            ],
+            "matchStrings": [
+                "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n[A-Z0-9_]+_TAG=\"\\$\\{[A-Z0-9_]+_TAG:-(?<currentValue>[^}]+)\\}\""
+            ],
+            "versioningTemplate": "docker"
+        }
+    ],
+
+    // Keep related dependency updates grouped for one coordinated review.
+    "packageRules": [
+        {
+            "groupName": "GitHub Actions",
+            "matchManagers": ["github-actions"]
+        },
+        {
+            "groupName": "Compose images",
+            "matchManagers": ["custom.regex", "docker-compose"]
+        },
+        {
+            "groupName": "Pre-commit hooks",
+            "matchManagers": ["pre-commit"]
+        }
+    ]
 }

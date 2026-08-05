@@ -54,9 +54,43 @@ Code and configuration comments use concise plain English, not HADES or pirate
 language. Explain intent, constraints, compatibility requirements, and
 non-obvious behavior instead of narrating each assignment.
 
-Project-owned scripts and configuration files should begin with the established
-copyright, Apache-2.0 notice, and filename summary block. Shell scripts use four-
-space indentation.
+Project-owned scripts and configuration files begin with the established
+copyright, Apache-2.0 notice, and filename summary block. Match this shape for
+hash-commented files:
+
+```text
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# filename: Concise summary whose continuation lines align with the summary.
+#           Continue only when the useful description does not fit one line.
+#
+```
+
+Shell scripts place their shebang first, followed by one blank line and this
+header. Markdown uses the equivalent established HTML comment. Do not add a
+YAML document-start marker before the header.
+
+Use framed comments for file-level sections and service introductions:
+
+```yaml
+#
+# Explain the purpose or constraint of the section.
+#
+```
+
+Use an unframed single-line comment for a block inside a service, such as
+`# Define the container environment` or `# Mount persistent application data`.
+Keep exactly one blank line between logical blocks. Do not insert blank lines
+inside a short mapping or list unless they separate named subsections.
+
+Inline comments use two spaces before `#`. Within one logical mapping or list,
+pad the code so every inline `#` begins in the same column. Recalculate the
+alignment whenever a line is added, removed, or renamed. Comments should state
+the setting's purpose, default, security boundary, or compatibility constraint;
+do not merely repeat the key name.
 
 ## Docker Compose Rules
 
@@ -79,6 +113,37 @@ core constraints.
   `test/check-compose-env.sh`.
 - Do not add image build or publish workflows: this repository publishes no
   project-owned image.
+
+Compose formatting is part of the repository interface. Follow these exact
+conventions:
+
+- Use two-space YAML indentation and no document-start marker.
+- Put shared `x-` anchors before `services`, each with a framed explanation.
+- Put a framed introduction immediately before every service.
+- Order service blocks as: image/container identity, special runtime or security
+  settings, labels, environment, published ports, volumes, healthcheck, and
+  `depends_on`. Omit unused blocks without leaving empty headings.
+- Begin the identity group with `# Docker image and container information`.
+- Separate every present service block with exactly one blank line.
+- Expand multi-item commands and healthcheck tests as one YAML item per line.
+  Do not use compact JSON-style arrays for those lists.
+- Add a short block-purpose comment immediately above `environment`, `ports`,
+  `volumes`, `healthcheck`, and `depends_on` when those blocks are present.
+- Group environment keys by owner or purpose. Put a single unframed subsection
+  comment above each group and one blank line between groups.
+- Align inline comments within the identity group, each environment subsection,
+  each volume list, each healthcheck setting group, and each dependency list.
+- Keep two spaces between the longest code entry and the aligned inline comment.
+- Preserve literal container ports, internal paths, and service names in
+  Compose; expose deployment-specific host ports, host paths, credentials, and
+  image tags through `example.env`.
+- Keep the `example.env` sections in the same service order as Compose and use
+  framed comments around every top-level setting group.
+- Apply `no-new-privileges`, bounded logs, and explicit update policy through
+  shared anchors. Do not add capabilities, host devices, privileged mode, or
+  writable mounts without documenting why the service requires them.
+- Keep Watchtower disabled for coordinated application, database, broker, and
+  companion upgrades; this stack must be updated intentionally.
 
 ## Paperless Upgrade Safety
 
@@ -130,6 +195,38 @@ features and its runtime guarantees Bash.
 Keep Makefile variables centralized near the top. User-facing output may use a
 light project flourish, but errors must name the problem and corrective action.
 
+Match the Privateerr and Plundarr Makefile structure:
+
+- Define uppercase variables for every public target in a framed `Makefile
+  target names` section, followed by one multiline `TARGETS` list.
+- Group service names, repository commands, Compose options, reusable commands,
+  dependencies, and file paths into separate framed sections.
+- Align `?=` operators within each related variable group.
+- Use tabs for recipes and `TARGETS` continuation entries; use four spaces for
+  indentation inside shell fragments embedded in recipes.
+- Declare `.PHONY: $(TARGETS)` after centralized variables and helper functions.
+- Give every target a framed comment. When it has prerequisite targets, include
+  a dependency block in exactly this form:
+
+```make
+#
+# $(TARGET): Short target description.
+#
+# Dependencies:
+#   $(OTHER_TARGET) - Why this dependency is needed.
+#
+```
+
+- Route public lifecycle commands through the shared Compose variables and
+  options rather than repeating flags in recipes.
+- Keep `make help` generated through the shared `help_line` function, ordered
+  the same way as `TARGETS`.
+- Never make stop, status, or log inspection depend on secret validation; those
+  recovery commands must remain available when application configuration is
+  broken.
+- Do not add destructive cleanup targets that delete Paperless documents,
+  PostgreSQL data, broker data, or other application state.
+
 Supported commands include:
 
 ```sh
@@ -146,19 +243,31 @@ make ps
 make logs
 ```
 
-Do not add destructive cleanup targets that delete Paperless documents,
-PostgreSQL data, or other application state.
-
 ## GitHub Workflow Rules
 
 - Pin GitHub Actions to full commit SHAs with readable version comments.
 - Keep workflow permissions minimal and explicit.
+- Use four-space indentation in `.github/workflows/*.yml`; the more compact
+  two-space rule still applies to Compose and other YAML.
+- Start every workflow with the established copyright, license, and filename
+  summary block; do not add a YAML document-start marker.
+- Explain trigger policy, job responsibility, and each logical step group with
+  framed plain-English comments. Keep one blank line between those groups.
+- Keep themed workflow and step names concise. Comments describing security or
+  behavior remain sober and literal.
+- Set a finite `timeout-minutes` on each job.
+- Check out with `persist-credentials: false` and grant each job only the
+  permissions required by its actions.
 - Use Renovate rather than adding Dependabot for the same dependency set.
 - Validate Compose, repository-owned scripts, YAML, secrets, and configuration
   policy on pull requests.
 - Keep OpenSSF Scorecard as repository-level supply-chain analysis.
 - Do not add CodeQL language scanning unless the repository later owns a
   supported production codebase.
+
+Format `.github/renovate.json5` with four-space indentation. Separate schema,
+scheduling, managers, custom managers, and package rules with one blank line and
+a concise `//` comment explaining the policy of each section.
 
 Workflow and step names may use tasteful document, archive, or HADES theming.
 Workflow comments remain plain English.

@@ -1,4 +1,3 @@
----
 #
 # Copyright 2025-2026 Scott Gigawatt
 #
@@ -7,176 +6,297 @@
 # docker-compose.yml: Single-file Paperless-ngx deployment for Docker Compose,
 #                     Synology Container Manager, and Portainer.
 #
+# Services included:
+#   - redis:          https://hub.docker.com/_/redis
+#   - postgres:       https://hub.docker.com/_/postgres
+#   - gotenberg:      https://github.com/gotenberg/gotenberg
+#   - tika:           https://tika.apache.org
+#   - paperless-ngx:  https://github.com/paperless-ngx/paperless-ngx
+#   - paperless-ai:   https://github.com/clusterzx/paperless-ai
+#
 
 #
-# Shared defaults for long-running services.
+# Setup default properties for all containers.
 #
-x-default-container: &default-container
-  pull_policy: always
-  restart: unless-stopped
-  security_opt:
-    - no-new-privileges:true
-  logging:
-    driver: json-file
-    options:
-      max-size: ${LOG_MAX_SIZE}
-      max-file: ${LOG_MAX_FILE}
+x-default-container: &default-container  # YAML anchor for default container settings
+  pull_policy: always                    # Pull the configured image before recreation
+  restart: unless-stopped                # Restart unless an operator explicitly stops it
+  security_opt:                          # Apply container runtime security options
+    - no-new-privileges:true             # Prevent processes from gaining new privileges
+  logging:                               # Configure bounded JSON container logs
+    driver: json-file                    # Use Docker's JSON file logging driver
+    options:                             # Configure log rotation limits
+      max-size: ${LOG_MAX_SIZE}          # Maximum size of each rotated log file
+      max-file: ${LOG_MAX_FILE}          # Maximum number of log files retained
 
+#
+# Labels for containers that should not be updated unattended by Watchtower.
+#
+# Paperless-ngx upgrades can include database migrations and coordinated image
+# changes. Update the stack intentionally after reviewing release notes and the
+# repository upgrade guide.
+#
+x-disable-watchtower-updates: &disable-watchtower-updates  # Disable unattended Watchtower updates
+  - "com.centurylinklabs.watchtower.enable=false"          # Require intentional updates for this container
+
+#
+# Define the services used in this stack.
+#
 services:
   #
-  # Redis-compatible message broker used by Paperless background workers.
+  # Configure the Redis-compatible broker used by Paperless background workers.
   #
   redis:
-    <<: *default-container
-    image: docker.io/library/redis:${REDIS_TAG}
-    user: ${DEFAULT_UID}:${DEFAULT_GID}
-    read_only: true
+    # Docker image and container information
+    <<: *default-container                        # Pull in default container settings
+    image: docker.io/library/redis:${REDIS_TAG}   # Run the reviewed Redis image version
+    container_name: redis-${REDIS_TAG}            # Append the image tag to the container name
+    hostname: redis                               # Set the internal service hostname
+    user: ${DEFAULT_UID}:${DEFAULT_GID}           # Run with the configured host identity
+    read_only: true                               # Keep the container root filesystem read-only
+
+    # Tune the broker connection queue
     sysctls:
-      - net.core.somaxconn=512
+      - net.core.somaxconn=512  # Permit the expected broker connection backlog
+
+    # Start Redis with authenticated client access
     command:
-      - redis-server
-      - --requirepass
-      - ${REDIS_PASSWORD}
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      timeout: ${REDIS_HEALTHCHECK_TIMEOUT}
-      interval: ${REDIS_HEALTHCHECK_INTERVAL}
-      retries: ${REDIS_HEALTHCHECK_RETRIES}
+      - redis-server              # Start the Redis server process
+      - --requirepass             # Require clients to authenticate
+      - ${REDIS_PASSWORD}         # Use the configured broker password
+
+    # Apply container labels
+    labels: *disable-watchtower-updates  # Update the broker intentionally with the stack
+
+    # Define the container environment
     environment:
-      TZ: ${TZ}
-      REDISCLI_AUTH: ${REDIS_PASSWORD}
+      TZ: ${TZ}                           # Set the container timezone
+      REDISCLI_AUTH: ${REDIS_PASSWORD}    # Authenticate redis-cli health checks
+
+    # Mount persistent broker data
     volumes:
-      - ${REDIS_CONFIG_PATH}:/data:rw
+      - ${REDIS_CONFIG_PATH}:/data:rw  # Redis persistence directory
+
+    # Report healthy when the authenticated broker responds
+    healthcheck:
+      test:                                    # Ping Redis through the bundled client
+        - CMD
+        - redis-cli
+        - ping
+      timeout: ${REDIS_HEALTHCHECK_TIMEOUT}    # Fail if the check exceeds this duration
+      interval: ${REDIS_HEALTHCHECK_INTERVAL}  # Run the check at this interval
+      retries: ${REDIS_HEALTHCHECK_RETRIES}    # Mark unhealthy after this many failures
 
   #
-  # PostgreSQL database for Paperless metadata and application state.
-  # The container data target differs between PostgreSQL 17 and 18+.
+  # Configure PostgreSQL for Paperless metadata and application state.
+  #
+  # PostgreSQL 17 and earlier use /var/lib/postgresql/data. PostgreSQL 18 and
+  # later use /var/lib/postgresql. Keep the image major version, mount target,
+  # and on-disk database migration synchronized.
   #
   postgres:
-    <<: *default-container
-    image: docker.io/library/postgres:${POSTGRES_TAG}
-    healthcheck:
-      test: ["CMD", "pg_isready", "-q", "-d", "${POSTGRES_DB}", "-U", "${POSTGRES_USER}"]
-      timeout: ${POSTGRES_HEALTHCHECK_TIMEOUT}
-      interval: ${POSTGRES_HEALTHCHECK_INTERVAL}
-      retries: ${POSTGRES_HEALTHCHECK_RETRIES}
+    # Docker image and container information
+    <<: *default-container                             # Pull in default container settings
+    image: docker.io/library/postgres:${POSTGRES_TAG}  # Run the reviewed PostgreSQL image version
+    container_name: postgres-${POSTGRES_TAG}           # Append the image tag to the container name
+    hostname: postgres                                 # Set the internal database hostname
+
+    # Apply container labels
+    labels: *disable-watchtower-updates  # Update the database intentionally with the stack
+
+    # Define the container environment
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}              # Create the Paperless database
+      POSTGRES_USER: ${POSTGRES_USER}          # Create the Paperless database user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}  # Set the Paperless database password
+
+    # Mount persistent database state
     volumes:
-      - ${POSTGRES_CONFIG_PATH}:${POSTGRES_DATA_TARGET}:rw
+      - ${POSTGRES_CONFIG_PATH}:${POSTGRES_DATA_TARGET}:rw  # Version-appropriate database directory
+
+    # Report healthy when the configured database accepts connections
+    healthcheck:
+      test:                                       # Query PostgreSQL readiness without printing secrets
+        - CMD
+        - pg_isready
+        - -q
+        - -d
+        - ${POSTGRES_DB}
+        - -U
+        - ${POSTGRES_USER}
+      timeout: ${POSTGRES_HEALTHCHECK_TIMEOUT}    # Fail if the check exceeds this duration
+      interval: ${POSTGRES_HEALTHCHECK_INTERVAL}  # Run the check at this interval
+      retries: ${POSTGRES_HEALTHCHECK_RETRIES}    # Mark unhealthy after this many failures
 
   #
-  # Gotenberg converts Office and email content into PDFs for Paperless.
+  # Configure Gotenberg to convert Office and email content into PDF files.
   #
   gotenberg:
-    <<: *default-container
-    image: docker.io/gotenberg/gotenberg:${GOTENBERG_TAG}
+    # Docker image and container information
+    <<: *default-container                                 # Pull in default container settings
+    image: docker.io/gotenberg/gotenberg:${GOTENBERG_TAG}  # Run the reviewed Gotenberg image version
+    container_name: gotenberg-${GOTENBERG_TAG}             # Append the image tag to the container name
+    hostname: gotenberg                                    # Set the internal conversion service hostname
+
+    # Disable browser JavaScript while allowing local conversion inputs
     command:
-      - gotenberg
-      - --chromium-disable-javascript=true
-      - --chromium-allow-list=file:///tmp/.*
+      - gotenberg                              # Start the Gotenberg service
+      - --chromium-disable-javascript=true     # Disable JavaScript during document conversion
+      - --chromium-allow-list=file:///tmp/.*   # Permit temporary local conversion inputs
+
+    # Apply container labels
+    labels: *disable-watchtower-updates  # Update the converter intentionally with the stack
 
   #
-  # Apache Tika extracts text and metadata from Office documents.
+  # Configure Apache Tika to extract text and metadata from Office documents.
   #
   tika:
-    <<: *default-container
-    image: docker.io/apache/tika:${TIKA_TAG}
+    # Docker image and container information
+    <<: *default-container                     # Pull in default container settings
+    image: docker.io/apache/tika:${TIKA_TAG}   # Run the reviewed Apache Tika image version
+    container_name: tika-${TIKA_TAG}           # Append the image tag to the container name
+    hostname: tika                             # Set the internal extraction service hostname
+
+    # Apply container labels
+    labels: *disable-watchtower-updates  # Update the extractor intentionally with the stack
 
   #
-  # Paperless-ngx application, consumer, scheduler, and task workers.
+  # Configure the Paperless-ngx web application, consumer, scheduler, and workers.
   #
   paperless-ngx:
-    <<: *default-container
-    image: ghcr.io/paperless-ngx/paperless-ngx:${PAPERLESS_TAG}
-    healthcheck:
-      test: ["CMD", "curl", "-fsS", "--max-time", "2", "http://localhost:8000"]
-      timeout: ${PAPERLESS_HEALTHCHECK_TIMEOUT}
-      interval: ${PAPERLESS_HEALTHCHECK_INTERVAL}
-      start_period: ${PAPERLESS_HEALTHCHECK_START_PERIOD}
-      retries: ${PAPERLESS_HEALTHCHECK_RETRIES}
+    # Docker image and container information
+    <<: *default-container                                       # Pull in default container settings
+    image: ghcr.io/paperless-ngx/paperless-ngx:${PAPERLESS_TAG}  # Run the reviewed Paperless-ngx version
+    container_name: paperless-ngx-${PAPERLESS_TAG}               # Append the image tag to the container name
+    hostname: paperless-ngx                                      # Set the internal application hostname
+
+    # Apply container labels
+    labels: *disable-watchtower-updates  # Paperless upgrades may run database migrations
+
+    # Define the container environment
     environment:
-      # Broker and database connectivity.
-      PAPERLESS_REDIS: ${PAPERLESS_REDIS}
-      PAPERLESS_DBENGINE: ${PAPERLESS_DBENGINE}
-      PAPERLESS_DBHOST: ${PAPERLESS_DBHOST}
-      PAPERLESS_DBNAME: ${POSTGRES_DB}
-      PAPERLESS_DBUSER: ${POSTGRES_USER}
-      PAPERLESS_DBPASS: ${POSTGRES_PASSWORD}
+      # Broker and database connectivity
+      PAPERLESS_REDIS: ${PAPERLESS_REDIS}          # Authenticated Redis broker URL
+      PAPERLESS_DBENGINE: ${PAPERLESS_DBENGINE}    # Select the PostgreSQL database backend
+      PAPERLESS_DBHOST: ${PAPERLESS_DBHOST}        # PostgreSQL service hostname
+      PAPERLESS_DBNAME: ${POSTGRES_DB}             # Paperless database name
+      PAPERLESS_DBUSER: ${POSTGRES_USER}           # Paperless database user
+      PAPERLESS_DBPASS: ${POSTGRES_PASSWORD}       # Paperless database password
 
-      # Runtime identity, URL, and required signing secret.
-      USERMAP_UID: ${DEFAULT_UID}
-      USERMAP_GID: ${DEFAULT_GID}
-      PAPERLESS_TIME_ZONE: ${TZ}
-      PAPERLESS_URL: ${PAPERLESS_URL}
-      PAPERLESS_CSRF_TRUSTED_ORIGINS: ${PAPERLESS_CSRF_TRUSTED_ORIGINS}
-      PAPERLESS_SECRET_KEY: ${PAPERLESS_SECRET_KEY}
+      # Runtime identity, public URL, and required signing secret
+      USERMAP_UID: ${DEFAULT_UID}                                         # Map Paperless files to the host user
+      USERMAP_GID: ${DEFAULT_GID}                                         # Map Paperless files to the host group
+      PAPERLESS_TIME_ZONE: ${TZ}                                          # Set the Paperless application timezone
+      PAPERLESS_URL: ${PAPERLESS_URL}                                     # Define the canonical public URL
+      PAPERLESS_CSRF_TRUSTED_ORIGINS: ${PAPERLESS_CSRF_TRUSTED_ORIGINS}   # Trust the configured reverse proxy origin
+      PAPERLESS_SECRET_KEY: ${PAPERLESS_SECRET_KEY}                       # Required stable key for signatures and sessions
 
-      # Initial administrator and document-processing behavior.
-      PAPERLESS_ADMIN_USER: ${PAPERLESS_ADMIN_USER}
-      PAPERLESS_ADMIN_PASSWORD: ${PAPERLESS_ADMIN_PASSWORD}
-      PAPERLESS_EMPTY_TRASH_DIR: ${PAPERLESS_EMPTY_TRASH_DIR}
-      PAPERLESS_CONSUMER_DELETE_DUPLICATES: ${PAPERLESS_CONSUMER_DELETE_DUPLICATES}
-      PAPERLESS_FILENAME_FORMAT: '{{ created_year }}/{{ correspondent }}/{{ document_type }}/{{ title }}'
-      PAPERLESS_OCR_LANGUAGE: ${PAPERLESS_OCR_LANGUAGE}
-      PAPERLESS_OCR_ROTATE_PAGES_THRESHOLD: ${PAPERLESS_OCR_ROTATE_PAGES_THRESHOLD}
-      PAPERLESS_TASK_WORKERS: ${PAPERLESS_TASK_WORKERS}
+      # Initial administrator and document-processing behavior
+      PAPERLESS_ADMIN_USER: ${PAPERLESS_ADMIN_USER}                                                        # Initial administrator username
+      PAPERLESS_ADMIN_PASSWORD: ${PAPERLESS_ADMIN_PASSWORD}                                                # Initial administrator password
+      PAPERLESS_EMPTY_TRASH_DIR: ${PAPERLESS_EMPTY_TRASH_DIR}                                              # Trash directory relative to media root
+      PAPERLESS_CONSUMER_DELETE_DUPLICATES: ${PAPERLESS_CONSUMER_DELETE_DUPLICATES}                        # Remove duplicate consume inputs
+      PAPERLESS_FILENAME_FORMAT: '{{ created_year }}/{{ correspondent }}/{{ document_type }}/{{ title }}'  # Archive path template
+      PAPERLESS_OCR_LANGUAGE: ${PAPERLESS_OCR_LANGUAGE}                                                    # Primary OCR language
+      PAPERLESS_OCR_ROTATE_PAGES_THRESHOLD: ${PAPERLESS_OCR_ROTATE_PAGES_THRESHOLD}                        # Rotation confidence threshold
+      PAPERLESS_TASK_WORKERS: ${PAPERLESS_TASK_WORKERS}                                                    # Number of background task workers
 
-      # Office document parsing and conversion.
-      PAPERLESS_TIKA_ENABLED: ${PAPERLESS_TIKA_ENABLED}
-      PAPERLESS_TIKA_GOTENBERG_ENDPOINT: ${PAPERLESS_TIKA_GOTENBERG_ENDPOINT}
-      PAPERLESS_TIKA_ENDPOINT: ${PAPERLESS_TIKA_ENDPOINT}
+      # Office document parsing and conversion
+      PAPERLESS_TIKA_ENABLED: ${PAPERLESS_TIKA_ENABLED}                        # Enable Office document support
+      PAPERLESS_TIKA_GOTENBERG_ENDPOINT: ${PAPERLESS_TIKA_GOTENBERG_ENDPOINT}  # Gotenberg conversion endpoint
+      PAPERLESS_TIKA_ENDPOINT: ${PAPERLESS_TIKA_ENDPOINT}                      # Apache Tika extraction endpoint
+
+    # Publish the Paperless web interface
     ports:
-      - "${PAPERLESS_WEBUI_PORT}:8000"
+      - ${PAPERLESS_WEBUI_PORT}:8000  # Host port for the Paperless web interface
+
+    # Mount persistent application directories
     volumes:
-      - ${PAPERLESS_DATA_PATH}:/usr/src/paperless/data:rw
-      - ${PAPERLESS_MEDIA_PATH}:/usr/src/paperless/media:rw
-      - ${PAPERLESS_EXPORT_PATH}:/usr/src/paperless/export:rw
-      - ${PAPERLESS_CONSUME_PATH}:/usr/src/paperless/consume:rw
-      - ${PAPERLESS_TRASH_PATH}:/usr/src/paperless/trash:rw
+      - ${PAPERLESS_DATA_PATH}:/usr/src/paperless/data:rw        # Search index and application data
+      - ${PAPERLESS_MEDIA_PATH}:/usr/src/paperless/media:rw      # Documents and generated thumbnails
+      - ${PAPERLESS_EXPORT_PATH}:/usr/src/paperless/export:rw    # Document export staging directory
+      - ${PAPERLESS_CONSUME_PATH}:/usr/src/paperless/consume:rw  # Incoming document directory
+      - ${PAPERLESS_TRASH_PATH}:/usr/src/paperless/trash:rw      # Paperless trash directory
+
+    # Report healthy when the web application responds successfully
+    healthcheck:
+      test:                                                # Request the local application endpoint
+        - CMD
+        - curl
+        - -fsS
+        - --max-time
+        - "2"
+        - http://localhost:8000
+      timeout: ${PAPERLESS_HEALTHCHECK_TIMEOUT}            # Fail if the check exceeds this duration
+      interval: ${PAPERLESS_HEALTHCHECK_INTERVAL}          # Run the check at this interval
+      start_period: ${PAPERLESS_HEALTHCHECK_START_PERIOD}  # Allow database migrations and startup work
+      retries: ${PAPERLESS_HEALTHCHECK_RETRIES}            # Mark unhealthy after this many failures
+
+    # Specify container service dependencies
     depends_on:
       postgres:
-        condition: service_healthy
+        condition: service_healthy  # Wait for PostgreSQL readiness
       redis:
-        condition: service_healthy
+        condition: service_healthy  # Wait for authenticated Redis readiness
       tika:
-        condition: service_started
+        condition: service_started  # Start the text extraction service first
       gotenberg:
-        condition: service_started
+        condition: service_started  # Start the document conversion service first
 
   #
-  # Optional Paperless-AI companion service.
+  # Configure the optional Paperless-AI companion service.
   #
   paperless-ai:
-    <<: *default-container
-    image: docker.io/clusterzx/paperless-ai:${PAPERLESS_AI_TAG}
+    # Docker image and container information
+    <<: *default-container                                       # Pull in default container settings
+    image: docker.io/clusterzx/paperless-ai:${PAPERLESS_AI_TAG}  # Run the reviewed Paperless-AI version
+    container_name: paperless-ai-${PAPERLESS_AI_TAG}             # Append the image tag to the container name
+    hostname: paperless-ai                                       # Set the internal companion hostname
+
+    # Drop all Linux capabilities from the companion container
     cap_drop:
-      - ALL
-    healthcheck:
-      test: ["CMD-SHELL", "timeout 10s bash -c ':> /dev/tcp/127.0.0.1/3000' || exit 1"]
-      timeout: ${PAPERLESS_AI_HEALTHCHECK_TIMEOUT}
-      interval: ${PAPERLESS_AI_HEALTHCHECK_INTERVAL}
-      start_period: ${PAPERLESS_AI_HEALTHCHECK_START_PERIOD}
-      retries: ${PAPERLESS_AI_HEALTHCHECK_RETRIES}
+      - ALL  # Remove capabilities not required by Paperless-AI
+
+    # Apply container labels
+    labels: *disable-watchtower-updates  # Update the unmaintained companion only after review
+
+    # Define the container environment
     environment:
-      PUID: ${DEFAULT_UID}
-      PGID: ${DEFAULT_GID}
+      PUID: ${DEFAULT_UID}  # Map companion files to the host user
+      PGID: ${DEFAULT_GID}  # Map companion files to the host group
+
+    # Publish the Paperless-AI web interface
     ports:
-      - "${PAPERLESS_AI_WEBUI_PORT}:3000"
+      - ${PAPERLESS_AI_WEBUI_PORT}:3000  # Host port for the Paperless-AI interface
+
+    # Mount persistent companion configuration
     volumes:
-      - ${PAPERLESS_AI_CONFIG_PATH}:/app/data:rw
+      - ${PAPERLESS_AI_CONFIG_PATH}:/app/data:rw  # Paperless-AI configuration and database
+
+    # Report healthy when Paperless-AI accepts local TCP connections
+    healthcheck:
+      test:                                                   # Probe the local TCP listener
+        - CMD-SHELL
+        - timeout 10s bash -c ':> /dev/tcp/127.0.0.1/3000' || exit 1
+      timeout: ${PAPERLESS_AI_HEALTHCHECK_TIMEOUT}            # Fail if the check exceeds this duration
+      interval: ${PAPERLESS_AI_HEALTHCHECK_INTERVAL}          # Run the check at this interval
+      start_period: ${PAPERLESS_AI_HEALTHCHECK_START_PERIOD}  # Allow companion initialization work
+      retries: ${PAPERLESS_AI_HEALTHCHECK_RETRIES}            # Mark unhealthy after this many failures
+
+    # Specify container service dependencies
     depends_on:
       paperless-ngx:
-        condition: service_healthy
+        condition: service_healthy  # Wait for the Paperless API to become healthy
 
+#
+# Configure the private bridge network used by the complete stack.
+#
 networks:
   default:
-    name: ${COMPOSE_PROJECT_NAME}
-    ipam:
-      driver: default
-      config:
-        - subnet: ${COMPOSE_NETWORK_SUBNET}
-          ip_range: ${COMPOSE_NETWORK_IP_RANGE}
-          gateway: ${COMPOSE_NETWORK_GATEWAY}
+    name: ${COMPOSE_PROJECT_NAME}  # Use the configured project network name
+    ipam:                          # Define static address management boundaries
+      driver: default              # Use Docker's default IPAM driver
+      config:                      # Configure the private network range
+        - subnet: ${COMPOSE_NETWORK_SUBNET}          # Private subnet assigned to the stack
+          ip_range: ${COMPOSE_NETWORK_IP_RANGE}      # Container allocation pool within the subnet
+          gateway: ${COMPOSE_NETWORK_GATEWAY}        # Gateway address within the allocation pool

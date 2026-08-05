@@ -6,11 +6,60 @@
 # Makefile: Validation and lifecycle commands for the Paperless-ngx stack.
 #
 
-ENV_FILE ?= .env
-EXAMPLE_ENV_FILE ?= example.env
-COMPOSE_FILE ?= docker-compose.yml
-COMPOSE_DOWN_TIMEOUT ?= 30
+#
+# Makefile target names.
+#
+ALL=all
+BUILD_DEPENDS=build-depends
+CHECK_ENV=check-env
+CHECK_COMPOSE_ENV=check-compose-env
+CONFIG=config
+CONFIG_EXAMPLE=config-example
+VALIDATE=validate
+PULL=pull
+UP=up
+DOWN=down
+RESTART=restart
+PS=ps
+LOGS=logs
+HELP=help
 
+TARGETS= \
+	$(ALL) \
+	$(BUILD_DEPENDS) \
+	$(CHECK_ENV) \
+	$(CHECK_COMPOSE_ENV) \
+	$(CONFIG) \
+	$(CONFIG_EXAMPLE) \
+	$(VALIDATE) \
+	$(PULL) \
+	$(UP) \
+	$(DOWN) \
+	$(RESTART) \
+	$(PS) \
+	$(LOGS) \
+	$(HELP)
+
+#
+# Repository-owned validation commands.
+#
+CHECK_ENV_COMMAND         ?= test/check-env.sh
+CHECK_COMPOSE_ENV_COMMAND ?= test/check-compose-env.sh
+
+#
+# Docker Compose files and lifecycle options.
+#
+COMPOSE_FILE          ?= docker-compose.yml
+COMPOSE_ENV_FILE      ?= $(ENV_FILE)
+COMPOSE_DOWN_TIMEOUT  ?= 30
+COMPOSE_DOWN_OPTIONS  ?= --timeout $(COMPOSE_DOWN_TIMEOUT) --remove-orphans
+COMPOSE_UP_OPTIONS    ?= --detach --remove-orphans
+COMPOSE_LOGS_OPTIONS  ?= --follow
+
+#
+# Docker Compose command compatible with 'docker compose' (v2) and
+# 'docker-compose' (v1).
+#
 DOCKER_COMPOSE := $(shell \
 	if docker compose version >/dev/null 2>&1; then \
 		echo "docker compose"; \
@@ -20,7 +69,10 @@ DOCKER_COMPOSE := $(shell \
 		echo ""; \
 	fi)
 
-COMPOSE = $(DOCKER_COMPOSE) --env-file $(ENV_FILE) -f $(COMPOSE_FILE)
+#
+# Docker Compose commands for the active and checked-in example environments.
+#
+COMPOSE = $(DOCKER_COMPOSE) --env-file $(COMPOSE_ENV_FILE) -f $(COMPOSE_FILE)
 EXAMPLE_COMPOSE = PAPERLESS_SECRET_KEY=ci-only-paperless-secret-key-that-is-not-used \
 	REDIS_PASSWORD=ci-only-redis-password \
 	PAPERLESS_REDIS=redis://:ci-only-redis-password@redis:6379 \
@@ -28,57 +80,170 @@ EXAMPLE_COMPOSE = PAPERLESS_SECRET_KEY=ci-only-paperless-secret-key-that-is-not-
 	PAPERLESS_ADMIN_PASSWORD=ci-only-admin-password \
 	$(DOCKER_COMPOSE) --env-file $(EXAMPLE_ENV_FILE) -f $(COMPOSE_FILE)
 
-.PHONY: all help build-depends check-env check-compose-env config \
-	config-example validate pull up down restart ps logs
+#
+# Help line formatting function.
+#
+define help_line
+	@printf "  %-24s %s\n" "$(1)" "$(2)"
+endef
 
-all: up
+#
+# Build dependencies.
+#
+DEPENDENCIES=docker
 
-help:
-	@printf "Paperless-ngx filing cabinet commands:\n"
-	@printf "  %-20s %s\n" "make check-env" "Reject missing or placeholder secrets in .env"
-	@printf "  %-20s %s\n" "make config" "Validate the active Compose configuration"
-	@printf "  %-20s %s\n" "make config-example" "Validate the checked-in example configuration"
-	@printf "  %-20s %s\n" "make validate" "Run repository-owned configuration checks"
-	@printf "  %-20s %s\n" "make pull" "Pull configured service images"
-	@printf "  %-20s %s\n" "make up" "Start or update the stack"
-	@printf "  %-20s %s\n" "make down" "Stop the stack without deleting persistent data"
-	@printf "  %-20s %s\n" "make restart" "Recreate the stack"
-	@printf "  %-20s %s\n" "make ps" "Show service status"
-	@printf "  %-20s %s\n" "make logs" "Follow stack logs"
+#
+# Environment file paths.
+#
+ENV_FILE=.env
+EXAMPLE_ENV_FILE=example.env
 
-build-depends:
-	@if [ -z "$(DOCKER_COMPOSE)" ]; then \
-		echo "Docker Compose is required. Install Docker Compose v2 or docker-compose v1."; \
+#
+# Targets that are not files (i.e. never up-to-date); these will run every
+# time the target is called or required.
+#
+.PHONY: $(TARGETS)
+
+#
+# $(ALL): Default Makefile target. Validate and start the complete stack.
+#
+# Dependencies:
+#   $(UP) - Validate, create, and start every service in the stack.
+#
+$(ALL): $(UP)
+
+#
+# $(BUILD_DEPENDS): Ensure Docker and Docker Compose are available.
+#
+$(BUILD_DEPENDS):
+	$(foreach exe,$(DEPENDENCIES), \
+		$(if $(shell which $(exe) 2> /dev/null),,$(error "No $(exe) in PATH")))
+	@$(DOCKER_COMPOSE) version >/dev/null 2>&1 || { \
+		echo "Docker Compose is not available."; \
+		echo "Install docker compose or docker-compose, then retry."; \
 		exit 1; \
-	fi
+	}
 
-check-env:
-	@test/check-env.sh "$(ENV_FILE)"
+#
+# $(CHECK_ENV): Reject missing, unsafe, or incompatible deployment settings.
+#
+$(CHECK_ENV):
+	@$(CHECK_ENV_COMMAND) "$(ENV_FILE)"
 
-check-compose-env:
-	@test/check-compose-env.sh "$(COMPOSE_FILE)" "$(EXAMPLE_ENV_FILE)"
+#
+# $(CHECK_COMPOSE_ENV): Keep Compose interpolation and example.env synchronized.
+#
+$(CHECK_COMPOSE_ENV):
+	@$(CHECK_COMPOSE_ENV_COMMAND) "$(COMPOSE_FILE)" "$(EXAMPLE_ENV_FILE)"
 
-config: build-depends check-env check-compose-env
+#
+# $(CONFIG): Validate the active Docker Compose configuration.
+#
+# Dependencies:
+#   $(BUILD_DEPENDS) - Ensure Docker and Docker Compose are available.
+#   $(CHECK_ENV) - Reject unsafe or incompatible active settings.
+#   $(CHECK_COMPOSE_ENV) - Keep Compose and example environment keys synchronized.
+#
+$(CONFIG): $(BUILD_DEPENDS) $(CHECK_ENV) $(CHECK_COMPOSE_ENV)
 	@$(COMPOSE) config --quiet
 
-config-example: build-depends check-compose-env
+#
+# $(CONFIG_EXAMPLE): Validate the checked-in example Compose configuration.
+#
+# Dependencies:
+#   $(BUILD_DEPENDS) - Ensure Docker and Docker Compose are available.
+#   $(CHECK_COMPOSE_ENV) - Keep Compose and example environment keys synchronized.
+#
+$(CONFIG_EXAMPLE): $(BUILD_DEPENDS) $(CHECK_COMPOSE_ENV)
 	@$(EXAMPLE_COMPOSE) config --quiet
 
-validate: config-example
+#
+# $(VALIDATE): Run every repository-owned configuration validation.
+#
+# Dependencies:
+#   $(CONFIG_EXAMPLE) - Validate the complete checked-in example deployment.
+#
+$(VALIDATE): $(CONFIG_EXAMPLE)
+	@echo "The example filing cabinet is structurally sound. 🗃️"
 
-pull: config
+#
+# $(PULL): Pull every configured service image without starting the stack.
+#
+# Dependencies:
+#   $(CONFIG) - Validate active deployment settings before pulling images.
+#
+$(PULL): $(CONFIG)
+	@echo "Pulling reviewed service images. 📦"
 	@$(COMPOSE) pull
 
-up: config
-	@$(COMPOSE) up --detach --remove-orphans
+#
+# $(UP): Validate, create, and start every service in the stack.
+#
+# Dependencies:
+#   $(CONFIG) - Validate active deployment settings before starting services.
+#
+$(UP): $(CONFIG)
+	@echo "Opening the Paperless-ngx filing cabinet. 🗃️"
+	@$(COMPOSE) up $(COMPOSE_UP_OPTIONS)
 
-down: build-depends
-	@$(COMPOSE) down --timeout $(COMPOSE_DOWN_TIMEOUT) --remove-orphans
+#
+# $(DOWN): Stop the stack without deleting persistent application data.
+#
+# Dependencies:
+#   $(BUILD_DEPENDS) - Ensure Docker and Docker Compose are available.
+#
+$(DOWN): $(BUILD_DEPENDS)
+	@echo "Closing the filing cabinet without shredding its contents. 🔒"
+	@$(COMPOSE) down $(COMPOSE_DOWN_OPTIONS)
 
-restart: down up
+#
+# $(RESTART): Recreate the complete stack with the active configuration.
+#
+# Dependencies:
+#   $(CONFIG) - Validate active deployment settings before recreation.
+#
+$(RESTART): $(CONFIG)
+	@echo "Re-indexing the cabinet doors without touching stored documents. 🔄"
+	@$(COMPOSE) down $(COMPOSE_DOWN_OPTIONS)
+	@$(COMPOSE) up $(COMPOSE_UP_OPTIONS)
 
-ps: build-depends
+#
+# $(PS): Display the current status of every Compose service.
+#
+# Dependencies:
+#   $(BUILD_DEPENDS) - Ensure Docker and Docker Compose are available.
+#
+$(PS): $(BUILD_DEPENDS)
 	@$(COMPOSE) ps
 
-logs: build-depends
-	@$(COMPOSE) logs --follow
+#
+# $(LOGS): Follow output from every service in the stack.
+#
+# Dependencies:
+#   $(BUILD_DEPENDS) - Ensure Docker and Docker Compose are available.
+#
+$(LOGS): $(BUILD_DEPENDS)
+	@echo "Following the paper trail. 🔎"
+	@$(COMPOSE) logs $(COMPOSE_LOGS_OPTIONS)
+
+#
+# $(HELP): Display the supported repository commands.
+#
+$(HELP):
+	@echo "Usage: make [TARGET]"
+	@echo ""
+	@echo "Paperless-ngx filing cabinet targets:"
+	$(call help_line,$(ALL),Validates and starts the complete stack.)
+	$(call help_line,$(BUILD_DEPENDS),Ensures Docker and Docker Compose are available.)
+	$(call help_line,$(CHECK_ENV),Rejects missing or unsafe active settings.)
+	$(call help_line,$(CHECK_COMPOSE_ENV),Checks Compose and example.env key parity.)
+	$(call help_line,$(CONFIG),Validates the active Compose configuration.)
+	$(call help_line,$(CONFIG_EXAMPLE),Validates the checked-in example configuration.)
+	$(call help_line,$(VALIDATE),Runs repository-owned configuration checks.)
+	$(call help_line,$(PULL),Pulls configured service images.)
+	$(call help_line,$(UP),Starts or updates the complete stack.)
+	$(call help_line,$(DOWN),Stops the stack without deleting persistent data.)
+	$(call help_line,$(RESTART),Recreates the complete stack.)
+	$(call help_line,$(PS),Displays current service status.)
+	$(call help_line,$(LOGS),Follows service logs.)
+	$(call help_line,$(HELP),Displays this help message.)

@@ -10,6 +10,14 @@ trim_trailing_whitespace = true
 indent_style = space
 indent_size = 2
 
+[.github/workflows/*.{yml,yaml}]
+indent_style = space
+indent_size = 4
+
+[.github/renovate.json5]
+indent_style = space
+indent_size = 4
+
 [*.sh]
 indent_style = space
 indent_size = 4

@@ -1,17 +1,29 @@
-# Security Policy 🛡️🗃️
+<!--
+  Copyright 2025-2026 Scott Gigawatt
+
+  Licensed under the Apache License, Version 2.0.
+
+  SECURITY.md: Security policy for the HADES Paperless-ngx deployment.
+  -->
+
+# Cerberus Guards the Archive 🐕🐕🐕🔐
 
 Paperless stores sensitive documents in clear text on its storage volumes. Run
 this stack only on a trusted host, protect backups, and restrict network access
 with a reverse proxy, authentication, and firewall rules appropriate to the
 deployment.
 
-## Supported Configuration
+HADES employs Cerberus as Chief Information Security Officer. He has three
+heads, zero patience for public databases, and an exemplary record of detecting
+credential stuffing because he assumes every stranger is carrying snacks.
+
+## Supported Circles of HADES 🔥
 
 Security fixes target the current `main` branch and the pinned stable image
 versions in `example.env`. Older local configurations and modified third-party
 images are not maintained by this repository.
 
-## Reporting A Vulnerability
+## Whisper to Cerberus, Not the Town Square 🤫
 
 Do not open a public issue for credential leaks, authentication bypasses, exposed
 documents, or other exploitable findings.
@@ -26,7 +38,10 @@ You may also ask for a private contact route in
 [🔥HADES🔥](https://discord.gg/BpEGzWwGYf), but do not paste sensitive details into
 a public Discord channel.
 
-## Never Share
+Security reports receive serious handling even when the surrounding prose is
+ridiculous. Include the smallest reproducible, fully redacted evidence set.
+
+## Forbidden Offerings 🚫📜
 
 - `.env` or `PAPERLESS_SECRET_KEY`
 - administrator, PostgreSQL, Redis, AI-provider, or Paperless API credentials
@@ -34,7 +49,10 @@ a public Discord channel.
 - public URLs, proxy topology, or host paths that should remain private
 - unredacted container logs containing document names or infrastructure details
 
-## Deployment Priorities
+If a value would make identity theft easier, Cerberus does not want it pasted
+into GitHub. He cannot operate a credit-monitoring portal with his paws.
+
+## Lock the Crypt Before Filing 🔒⚰️
 
 - Replace every example password and generate a unique signing key.
 - Keep the signing key stable and protected in backups.
@@ -52,3 +70,7 @@ Paperless-ngx, Paperless-AI, PostgreSQL, Redis, Gotenberg, and Apache Tika are
 third-party projects. Report upstream vulnerabilities to the affected project as
 well as privately notifying this repository when its deployment guidance needs a
 correction.
+
+The Eternal Archive is allowed to be dramatic. Its incident response must not
+be. Report privately, preserve evidence, rotate only what must be rotated, and
+document the recovery before declaring the demons contained. 🛡️🔥

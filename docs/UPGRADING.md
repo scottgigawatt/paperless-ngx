@@ -1,9 +1,19 @@
-# Upgrading Paperless-ngx Without Summoning a Filing Demon 🔥📁
+<!--
+  Copyright 2025-2026 Scott Gigawatt
+
+  Licensed under the Apache License, Version 2.0.
+
+  UPGRADING.md: Safe upgrade rituals for the HADES Paperless-ngx deployment.
+  -->
+
+# Upgrade HADES Without Summoning Middle Management 🔥📁
 
 Paperless upgrades may run irreversible database migrations. Treat the image tag
-as application code, not as a decorative label.
+as application code, not as a decorative label. The most dangerous creature in
+the underworld is not a filing demon; it is a confident operator with an
+untested backup and `latest` in their clipboard.
 
-## Before Every Upgrade
+## Before Every Séance 🕯️
 
 1. Read the [Paperless-ngx administration guide](https://docs.paperless-ngx.com/administration/)
    and the release notes for the target version.
@@ -16,7 +26,10 @@ as application code, not as a decorative label.
 > A valid Compose file is not proof that a database migration is safe. Never
 > replace a major image version until the required upgrade path is confirmed.
 
-## PostgreSQL 17 And 18 Use Different Data Targets
+HADES calls this the Change Control Ritual. It resembles ordinary preparation,
+but the checklist is printed on heavier paper and everyone looks haunted.
+
+## PostgreSQL Moved the Eternal Ledger Downstairs 🐘📚
 
 The official PostgreSQL image requires different container mount targets:
 
@@ -46,7 +59,10 @@ Before changing or recreating that service:
 > successfully. A healthy `pg_isready` response proves only that a database is
 > accepting connections, not that it contains the expected Paperless records.
 
-## Paperless-ngx v3 Upgrade Gate
+An empty healthy database is still empty. It is merely empty with excellent
+posture.
+
+## Pay the Paperless-ngx v3 Tollkeeper 🛑
 
 The checked-in example currently pins Paperless-ngx `3.0.5`. Upstream requires
 all v3 upgrades to start from `2.20.15`.
@@ -64,7 +80,10 @@ If the instance already attempted to pull v3 but stopped with
 The reported startup failure occurs before v3 migrations, but that alone does
 not prove the previous database version was `2.20.15`.
 
-## Generate The Required Signing Key
+The tollkeeper accepts exactly one currency: evidence. Screaming "but Compose
+pulled it successfully" is not evidence and only encourages him.
+
+## Forge the Seal of the Eternal Archive 🔑🔥
 
 Paperless-ngx v3 refuses to start without a unique signing key:
 
@@ -88,7 +107,10 @@ password-only Redis URL uses this form:
 redis://:<URL-encoded-password>@redis:6379
 ```
 
-## Review v3 Behavior Changes
+Do not laminate the signing key, post it beside the NAS, or tattoo it on the
+intern. Store it in the protected secret and backup system.
+
+## Read the New Infernal Bylaws 📜
 
 This repository already sets the PostgreSQL engine explicitly and preserves the
 old duplicate-rejection behavior. Review the remaining upstream changes before
@@ -111,7 +133,7 @@ starting v3:
 Read the complete [official v3 migration guide](https://docs.paperless-ngx.com/migration-v3/)
 for the exact mappings and action items.
 
-## Paperless-AI Is A Separate Upgrade Decision
+## The Optional Oracle Is on Administrative Leave 🔮
 
 The external `clusterzx/paperless-ai` project currently describes itself as
 unmaintained, while Paperless-ngx v3 now includes official AI functionality. The
@@ -123,7 +145,10 @@ migration is healthy. If it fails, stop the Paperless-AI service and preserve it
 data for a deliberate migration or troubleshooting pass. Do not mix an optional
 AI integration failure with the database migration rollback decision.
 
-## Start And Verify
+Never let an optional oracle hold the Eternal Ledger hostage. Migrate the core
+archive first; invite prophecy only after the records stop screaming.
+
+## Raise the New Stack Carefully ⚡
 
 After the backup, prerequisite version, secret, and settings are confirmed:
 
@@ -149,4 +174,6 @@ an unmaintained optional integration as a reason to roll a healthy core archive
 back without first separating the failures.
 
 Keep the pre-upgrade backup until normal operation has been verified for several
-days. A green healthcheck is delightful; a tested restore is better. 🗃️
+days. A green healthcheck is delightful; a tested restore is better. The former
+is a light on a dashboard. The latter is how you avoid explaining data loss to
+the Four Horsemen of Compliance. 🗃️🔥

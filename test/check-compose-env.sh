@@ -5,41 +5,139 @@
 #
 # Licensed under the Apache License, Version 2.0.
 #
-# check-compose-env.sh: Keep Compose interpolation and example.env in sync.
+# check-compose-env.sh: Keep Docker Compose interpolation and example.env
+#                       declarations synchronized.
+#
+# The script:
+#   - Accepts optional Compose and example environment file paths.
+#   - Extracts every ${VARIABLE} interpolation from the Compose deployment.
+#   - Extracts environment keys without sourcing their values.
+#   - Rejects duplicate example environment declarations.
+#   - Reports variables missing from or unused by either deployment artifact.
+#   - Removes all temporary comparison files on success, failure, or interruption.
 #
 
+#
+# Fail on errors and unset variables.
+#
 set -eu
 
-compose_file=${1:-docker-compose.yml}
-env_file=${2:-example.env}
+#
+# Use bytewise sorting so sort and comm produce identical ordering everywhere.
+#
+LC_ALL=C
+export LC_ALL
+
+#
+# Input files and script state used for consistent output.
+#
+COMPOSE_FILE=${1:-${COMPOSE_FILE:-docker-compose.yml}}
+ENV_FILE=${2:-${EXAMPLE_ENV_FILE:-example.env}}
+script_name=check-compose-env.sh
+failed=0
+work_dir=""
+
+#
+# Print a consistent status line for local validation and CI logs.
+#
+log() {
+    printf '[%s] %s\n' "${script_name}" "$*"
+}
+
+#
+# Remove only the temporary directory created by this script.
+#
+cleanup() {
+    if [ -n "${work_dir}" ] && [ -d "${work_dir}" ]; then
+        rm -rf -- "${work_dir}"
+    fi
+}
+
+#
+# Print a labeled key list and record one aggregated validation failure.
+#
+report_key_list() {
+    report_key_list_label=$1
+    report_key_list_path=$2
+
+    log "ERROR: ${report_key_list_label}" >&2
+    sed 's/^/  - /' "${report_key_list_path}" >&2
+    failed=1
+}
+
+#
+# Reject absent input files before creating temporary comparison state.
+#
+if [ ! -f "${COMPOSE_FILE}" ]; then
+    log "ERROR: Compose file not found: ${COMPOSE_FILE}" >&2
+    exit 1
+fi
+
+if [ ! -f "${ENV_FILE}" ]; then
+    log "ERROR: Example environment file not found: ${ENV_FILE}" >&2
+    exit 1
+fi
+
+#
+# Create isolated comparison files and guarantee cleanup on every exit path.
+#
 work_dir=$(mktemp -d "${TMPDIR:-/tmp}/paperless-compose-env.XXXXXX")
-trap 'rm -rf "${work_dir}"' EXIT HUP INT TERM
+trap cleanup EXIT HUP INT TERM
 
-compose_keys=${work_dir}/compose-keys
-env_keys=${work_dir}/env-keys
-missing_keys=${work_dir}/missing-keys
-unused_keys=${work_dir}/unused-keys
+COMPOSE_KEYS="${work_dir}/compose-keys"
+ENV_KEYS_RAW="${work_dir}/env-keys-raw"
+ENV_KEYS="${work_dir}/env-keys"
+DUPLICATE_ENV_KEYS="${work_dir}/duplicate-env-keys"
+MISSING_ENV_KEYS="${work_dir}/missing-env-keys"
+UNUSED_ENV_KEYS="${work_dir}/unused-env-keys"
 
-grep -Eo '\$\{[A-Z][A-Z0-9_]*' "${compose_file}" \
+#
+# Extract unique Compose interpolation keys without resolving or printing any
+# environment value.
+#
+grep -Eo '\$\{[A-Z][A-Z0-9_]*' "${COMPOSE_FILE}" \
     | sed 's/^\${//' \
-    | sort -u > "${compose_keys}"
+    | sort -u > "${COMPOSE_KEYS}"
 
-sed -n 's/^\([A-Z][A-Z0-9_]*\)=.*/\1/p' "${env_file}" \
-    | sort -u > "${env_keys}"
+#
+# Extract raw example environment keys, retain duplicate evidence, and create
+# the sorted unique list required by comm.
+#
+sed -n 's/^\([A-Z][A-Z0-9_]*\)=.*/\1/p' "${ENV_FILE}" > "${ENV_KEYS_RAW}"
+sort "${ENV_KEYS_RAW}" | uniq -d > "${DUPLICATE_ENV_KEYS}"
+sort -u "${ENV_KEYS_RAW}" > "${ENV_KEYS}"
 
-comm -23 "${compose_keys}" "${env_keys}" > "${missing_keys}"
-comm -13 "${compose_keys}" "${env_keys}" > "${unused_keys}"
+#
+# Compare both sorted key sets in each direction.
+#
+comm -23 "${COMPOSE_KEYS}" "${ENV_KEYS}" > "${MISSING_ENV_KEYS}"
+comm -13 "${COMPOSE_KEYS}" "${ENV_KEYS}" > "${UNUSED_ENV_KEYS}"
 
-if [ -s "${missing_keys}" ]; then
-    echo "Variables used by ${compose_file} but missing from ${env_file}:"
-    sed 's/^/  - /' "${missing_keys}"
+#
+# Report every parity problem in one pass so maintainers can repair the complete
+# environment contract before rerunning validation.
+#
+if [ -s "${DUPLICATE_ENV_KEYS}" ]; then
+    report_key_list "Variables declared more than once in ${ENV_FILE}:" "${DUPLICATE_ENV_KEYS}"
+fi
+
+if [ -s "${MISSING_ENV_KEYS}" ]; then
+    report_key_list "Variables used by ${COMPOSE_FILE} but missing from ${ENV_FILE}:" "${MISSING_ENV_KEYS}"
+fi
+
+if [ -s "${UNUSED_ENV_KEYS}" ]; then
+    report_key_list "Variables declared by ${ENV_FILE} but unused by ${COMPOSE_FILE}:" "${UNUSED_ENV_KEYS}"
+fi
+
+#
+# Return one failure after reporting all duplicate, missing, and unused keys.
+#
+if [ "${failed}" -ne 0 ]; then
+    log "Repair the environment contract, then run make check-compose-env again." >&2
     exit 1
 fi
 
-if [ -s "${unused_keys}" ]; then
-    echo "Variables declared by ${env_file} but unused by ${compose_file}:"
-    sed 's/^/  - /' "${unused_keys}"
-    exit 1
-fi
-
-echo "${compose_file} and ${env_file} declare the same variables."
+#
+# Report one clear success line after both deployment artifacts agree.
+#
+log "Compose and example.env agree. The infernal filing index has no loose labels. 📇🔥"

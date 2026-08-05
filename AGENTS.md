@@ -33,10 +33,28 @@ deployment configuration, validation, documentation, and repository governance.
 
 ## Documentation Voice
 
-Public Markdown should preserve the existing document-archive and HADES voice:
-funny, a little theatrical, visually readable, and operationally precise. Keep
-the centered badges, emoji, callouts, and existing Discord identity when editing
-the root README.
+Public Markdown uses the **HADES Department of Infernal Records** theme. In this
+repository, HADES expands to **Highly Automated Document Extraction & Storage**:
+an absurdly overstaffed underworld bureaucracy where receipts are summoned,
+OCR is mandatory, PostgreSQL keeps the eternal ledger, Redis operates the
+pneumatic tubes, Gotenberg runs the PDF forge, Tika translates cursed Office
+files, and Paperless-AI is the optional oracle currently on administrative
+leave.
+
+Make the prose genuinely funny, theatrical, and visually readable while keeping
+every command and operational claim exact. Reuse the same infernal-office
+vocabulary throughout public Markdown rather than introducing unrelated themes.
+Good recurring terms include:
+
+- Infernal Records Office, Eternal Archive, or HADES for the deployment
+- mortal archivist or clerk for the operator
+- form, decree, filing ritual, or approved incantation for procedures
+- Cerberus, the vault, or the archive gates for security boundaries
+- filing demon, cursed paperwork, and eternal ledger for troubleshooting
+
+Keep the centered badges, emoji, callouts, and existing Discord identity when
+editing the root README. Use relevant emoji as scanning landmarks, especially
+`🔥`, `🗃️`, `📜`, `🧾`, `🖋️`, `🔐`, `🐕`, and `💀`.
 
 Do not let jokes obscure commands, paths, warnings, backup steps, migration
 requirements, or secret-handling rules. Use GitHub callouts where they improve

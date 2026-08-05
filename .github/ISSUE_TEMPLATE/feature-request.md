@@ -1,27 +1,38 @@
 ---
-name: "Feature request for the archive ✨"
-about: "Suggest a Compose, validation, automation, or documentation improvement"
+name: "Petition the infernal bureaucracy ✨🔥"
+about: "Suggest a Compose, validation, automation, or handbook improvement"
 title: "[FEATURE] "
 labels: enhancement
 assignees: scottgigawatt
 ---
 
-**Problem to solve**
+<!--
+  Copyright 2025-2026 Scott Gigawatt
+
+  Licensed under the Apache License, Version 2.0.
+
+  feature-request.md: Feature petition for the HADES records office.
+  -->
+
+# Form NEW-666: Petition for Additional Bureaucracy ✨📜
+
+**Which mortal inconvenience requires eternal intervention?**
 What limitation or operational pain are you encountering?
 
-**Requested improvement**
+**Requested infernal machinery**
 Describe the desired behavior.
 
-**Where should it live?**
+**Which departmental basement should contain it?**
 Is this a Compose setting, service integration, validation check, workflow, or
 documentation change?
 
-**Alternatives considered**
+**Less dramatic alternatives considered**
 List workarounds or related upstream features.
 
-**Compatibility**
+**Treaties with the mortal realm**
 Explain any Synology Container Manager, Portainer, architecture, migration, or
 secret-management constraints.
 
-**Extra context**
-Links, redacted examples, or sketches are welcome.
+**Offerings for the review committee**
+Links, redacted examples, or sketches are welcome. Souls are not an accepted
+dependency-management format.

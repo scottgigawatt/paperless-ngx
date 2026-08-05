@@ -1,7 +1,15 @@
+<!--
+  Copyright 2025-2026 Scott Gigawatt
+
+  Licensed under the Apache License, Version 2.0.
+
+  README.md: Operate the HADES Paperless-ngx document archive.
+  -->
+
 <hr />
 
 <p align="center">
-  <em>📜 Star this repo to keep your docs in line and your chaos in check.</em>
+  <em>📜 Star this repo. The Department notices everything, especially unfiled receipts.</em>
 </p>
 
 <p align="center">
@@ -22,7 +30,7 @@
 <p align="center">─── ⛧ ───</p>
 
 <p align="center">
-  <em>💀 Got rogue PDFs or rebellious receipts? Cast them into the fire and <strong>Enter 🔥HADES🔥</strong>.</em>
+  <em>💀 Got rogue PDFs or rebellious receipts? Submit Form 666-B and <strong>Enter 🔥HADES🔥</strong>.</em>
 </p>
 
 <p align="center">
@@ -33,27 +41,32 @@
 
 <hr />
 
-# Paperless-ngx 🗃️🤖
+# HADES Paperless-ngx 🗃️🔥
 
-Turn receipts, statements, manuals, and other paper clutter into a searchable
-digital archive on a Synology NAS or any Docker Compose host. This repository
+Welcome to **HADES: Highly Automated Document Extraction & Storage**, the
+underworld's premier bureaucracy for turning receipts, statements, manuals, and
+other mortal paper clutter into a searchable digital archive. Nobody escapes
+the paperwork—not even the paperwork.
+
+The Department operates on a Synology NAS or any Docker Compose host and
 provides one complete deployment file for Paperless-ngx, Paperless-AI,
-PostgreSQL, Redis, Gotenberg, and Apache Tika.
+PostgreSQL, Redis, Gotenberg, and Apache Tika. Six containers enter. One tidy
+archive leaves. Legal insists we clarify that the containers also leave.
 
 It remains inspired by the Synology guides from
 [Marius Hosting](https://mariushosting.com/) while adding repeatable validation,
 version management, safer upgrades, and repository governance.
 
-## What Is In The Cabinet? 📂
+## Meet the Infernal Civil Service 📂💀
 
-| Service | Purpose | Default image version |
-| ------- | ------- | --------------------- |
-| Paperless-ngx | Document archive, OCR, search, workflows, and API | `3.0.5` |
-| Paperless-AI | Legacy external AI analysis and tagging companion | `3.0.9` |
-| PostgreSQL | Paperless application database | `18.4` |
-| Redis | Broker for background and scheduled work | `8.8.1` |
-| Gotenberg | Office and email conversion to PDF | `8.34.0` |
-| Apache Tika | Office document text and metadata extraction | `3.2.3.0` |
+| Service | Infernal job title | Actual responsibility | Default image version |
+| ------- | ------------------ | --------------------- | --------------------- |
+| Paperless-ngx | Supreme Archivist | Document archive, OCR, search, workflows, and API | `3.0.5` |
+| Paperless-AI | Oracle on administrative leave | Legacy external AI analysis and tagging | `3.0.9` |
+| PostgreSQL | Keeper of the Eternal Ledger | Paperless application database | `18.4` |
+| Redis | Pneumatic-Tube Imp | Broker for background and scheduled work | `8.8.1` |
+| Gotenberg | PDF Forge Master | Office and email conversion to PDF | `8.34.0` |
+| Apache Tika | Translator of Cursed Documents | Office document text and metadata extraction | `3.2.3.0` |
 
 All image versions are configurable in `.env`. The example pins reviewed
 versions instead of floating `latest`, and Renovate proposes future updates as
@@ -62,19 +75,22 @@ reviewable pull requests.
 > [!NOTE]
 > Paperless-ngx v3 includes its own optional AI features. The separate
 > Paperless-AI service remains in this stack for users who intentionally use its
-> workflow and interface; it is not required for core Paperless operation.
+> workflow and interface; it is not required for core Paperless operation. The
+> Oracle may therefore be dismissed without collapsing the Department.
 
 > [!WARNING]
 > The [Paperless-AI upstream project](https://github.com/clusterzx/paperless-ai)
 > currently describes itself as unmaintained. Its latest `3.0.9` release is the
 > newest available image, not a guarantee of Paperless-ngx v3 compatibility.
 > Existing users should validate it separately with non-sensitive test data and
-> consider a planned move to Paperless-ngx's built-in AI features.
+> consider a planned move to Paperless-ngx's built-in AI features. Even HADES
+> does not grant production access to an unsupervised oracle.
 
-## Stop Before Upgrading To v3 🛑
+## Mandatory Ritual Pause Before v3 🛑🕯️
 
 Paperless-ngx v3 requires `PAPERLESS_SECRET_KEY` and can only migrate from
-version `2.20.15`.
+version `2.20.15`. This is a migration gate, not a suggestion whispered by a
+ghost in Compliance.
 
 > [!CAUTION]
 > If this is an existing installation, do not simply pull the v3 image. Read
@@ -96,9 +112,9 @@ duplicate-rejection behavior with
 `PAPERLESS_CONSUMER_DELETE_DUPLICATES=true`; the other changes require review
 against the private deployment.
 
-## Quick Start For A New Installation 🚀
+## Open a New Branch Office 🚀🏛️
 
-### 1. Prepare The Environment
+### 1. Complete the Entrance Forms 🖋️
 
 ```sh
 cp example.env .env
@@ -114,6 +130,9 @@ Edit `.env` and:
 - set the Synology host paths, UID, GID, timezone, URL, and network range;
 - URL-encode special characters used inside `PAPERLESS_REDIS`.
 
+Yes, HADES requires paperwork before it can eliminate paperwork. This is called
+institutional continuity.
+
 > [!IMPORTANT]
 > Keep `PAPERLESS_SECRET_KEY` stable and backed up. Rotating it invalidates
 > active sessions and other signed tokens.
@@ -125,7 +144,7 @@ make check-env
 make config
 ```
 
-### 2. Start With Docker Compose
+### 2. Recite the Approved Incantations 🔥
 
 ```sh
 make pull
@@ -140,7 +159,7 @@ finish:
 make logs
 ```
 
-### 3. Import With Synology Container Manager
+### 3. Establish a Synology Annex 🏢
 
 1. Place `docker-compose.yml`, `.env`, and the checked-in `config/` directory in
    the project folder on the NAS.
@@ -152,7 +171,7 @@ make logs
 The same root `docker-compose.yml` is also suitable for a Portainer stack. No
 overlay files or generated Compose fragments are required.
 
-## Configuration 🧭
+## Forms Required by the Ministry 🧭📜
 
 The root [`example.env`](example.env) is the complete settings reference for this
 deployment. The most important groups are:
@@ -170,7 +189,7 @@ Paperless-ngx listens on `${PAPERLESS_WEBUI_PORT}` and Paperless-AI listens on
 configured TLS reverse proxy; do not expose internal Redis, PostgreSQL, Tika, or
 Gotenberg ports.
 
-### Network And Synology Firewall
+### Draw the Network Pentagram Carefully 🛜
 
 The example reserves:
 
@@ -184,7 +203,10 @@ Choose an unused private subnet that does not overlap the NAS, VPN, LAN, or
 another Docker network. If the Synology firewall filters Docker bridge traffic,
 allow only the selected subnet and necessary published web ports.
 
-## Repository Commands 🛠️
+Overlapping subnets are how two departments accidentally summon the same
+printer. Nobody wants another incident report from Accounting.
+
+## Approved Incantations 🛠️✨
 
 ```text
 make help             Show supported commands
@@ -202,9 +224,10 @@ make logs             Follow logs from the stack
 
 `make down` deliberately avoids `--volumes`. This project does not provide a
 one-command nuke target for irreplaceable documents and database state. HADES
-has standards. 🔥
+has standards, a retention policy, and a shredder that requires three managers
+to turn three separate keys. 🔥
 
-## Persistent Data And Backups 💾
+## Where the Bodies—Sorry, Files—Are Buried 💾⚰️
 
 The checked-in directories retain only `.gitignore` files. Live data belongs in
 the host paths configured by `.env`:
@@ -227,7 +250,10 @@ and `.env`. Test restoration away from the live paths before relying on the
 backup. PostgreSQL major-version upgrades require their own reviewed migration;
 changing `POSTGRES_TAG` is not a database upgrade plan.
 
-## Troubleshooting 🔎
+If your backup has never been restored, it is not a backup; it is an optimistic
+collection of bytes wearing a tiny safety vest.
+
+## Complaints Window and Exorcism Desk 🔎🧯
 
 ### `PAPERLESS_SECRET_KEY is not set`
 
@@ -242,14 +268,14 @@ make up
 
 Do not paste the generated value into an issue or log.
 
-### Paperless Cannot Reach Redis
+### The Pneumatic-Tube Imp Is Missing
 
 - Confirm Redis is healthy with `make ps`.
 - Keep `REDIS_PASSWORD` and the password in `PAPERLESS_REDIS` synchronized.
 - Use `redis://:<URL-encoded-password>@redis:6379` for password-only auth.
 - Confirm the custom subnet does not overlap another network.
 
-### Paperless Is Unhealthy After An Upgrade
+### The Supreme Archivist Is Unwell After an Upgrade
 
 - Check that the prior v2 release was exactly `2.20.15` before v3 migration.
 - Inspect migration and index-rebuild output with `make logs`.
@@ -258,14 +284,14 @@ Do not paste the generated value into an issue or log.
   reached; do not repeatedly restart a failing migration and hope it becomes
   paperwork jazz.
 
-### Reverse Proxy Login Returns `403`
+### Cerberus Returns `403` at the Archive Gate
 
 Confirm `PAPERLESS_URL` and `PAPERLESS_CSRF_TRUSTED_ORIGINS`. Paperless v3 may
 also require trusted-proxy settings for login rate limiting; follow the upstream
 configuration guide for the actual proxy hop count and forwarded client-IP
 header.
 
-## Project Guides 📚
+## Infernal Employee Handbook 📚🔥
 
 - [Upgrading Paperless-ngx](docs/UPGRADING.md)
 - [Contributing](docs/CONTRIBUTING.md)
@@ -276,5 +302,6 @@ header.
 - [Marius Hosting Paperless-ngx guide](https://mariushosting.com/synology-install-paperless-ngx-with-office-files-support/)
 - [Marius Hosting Paperless-AI guide](https://mariushosting.com/how-to-install-paperless-ai-on-your-synology-nas/)
 
-Bring order to the archive, keep secrets out of the fire, and may every OCR job
-find its correspondent. 🗃️🔥
+Bring order to the Eternal Archive, keep secrets behind Cerberus, and may every
+OCR job find its correspondent before the quarterly performance review. HADES:
+because death is temporary, but records retention is forever. 🗃️🔥💀

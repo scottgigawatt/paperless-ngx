@@ -48,12 +48,12 @@ services:
   #
   redis:
     # Docker image and container information
-    <<: *default-container                        # Pull in default container settings
-    image: docker.io/library/redis:${REDIS_TAG}   # Run the reviewed Redis image version
-    container_name: redis-${REDIS_TAG}            # Append the image tag to the container name
-    hostname: redis                               # Set the internal service hostname
-    user: ${DEFAULT_UID}:${DEFAULT_GID}           # Run with the configured host identity
-    read_only: true                               # Keep the container root filesystem read-only
+    <<: *default-container                       # Pull in default container settings
+    image: docker.io/library/redis:${REDIS_TAG}  # Run the reviewed Redis image version
+    container_name: redis-${REDIS_TAG}           # Append the image tag to the container name
+    hostname: redis                              # Set the internal service hostname
+    user: ${DEFAULT_UID}:${DEFAULT_GID}          # Run with the configured host identity
+    read_only: true                              # Keep the container root filesystem read-only
 
     # Tune the broker connection queue
     sysctls:
@@ -61,17 +61,17 @@ services:
 
     # Start Redis with authenticated client access
     command:
-      - redis-server              # Start the Redis server process
-      - --requirepass             # Require clients to authenticate
-      - ${REDIS_PASSWORD}         # Use the configured broker password
+      - redis-server       # Start the Redis server process
+      - --requirepass      # Require clients to authenticate
+      - ${REDIS_PASSWORD}  # Use the configured broker password
 
     # Apply container labels
     labels: *disable-watchtower-updates  # Update the broker intentionally with the stack
 
     # Define the container environment
     environment:
-      TZ: ${TZ}                           # Set the container timezone
-      REDISCLI_AUTH: ${REDIS_PASSWORD}    # Authenticate redis-cli health checks
+      TZ: ${TZ}                         # Set the container timezone
+      REDISCLI_AUTH: ${REDIS_PASSWORD}  # Authenticate redis-cli health checks
 
     # Mount persistent broker data
     volumes:
@@ -79,7 +79,7 @@ services:
 
     # Report healthy when the authenticated broker responds
     healthcheck:
-      test:                                    # Ping Redis through the bundled client
+      test:  # Ping Redis through the bundled client
         - CMD
         - redis-cli
         - ping
@@ -116,7 +116,7 @@ services:
 
     # Report healthy when the configured database accepts connections
     healthcheck:
-      test:                                       # Query PostgreSQL readiness without printing secrets
+      test:  # Query PostgreSQL readiness without printing secrets
         - CMD
         - pg_isready
         - -q
@@ -140,9 +140,9 @@ services:
 
     # Disable browser JavaScript while allowing local conversion inputs
     command:
-      - gotenberg                              # Start the Gotenberg service
-      - --chromium-disable-javascript=true     # Disable JavaScript during document conversion
-      - --chromium-allow-list=file:///tmp/.*   # Permit temporary local conversion inputs
+      - gotenberg                             # Start the Gotenberg service
+      - --chromium-disable-javascript=true    # Disable JavaScript during document conversion
+      - --chromium-allow-list=file:///tmp/.*  # Permit temporary local conversion inputs
 
     # Apply container labels
     labels: *disable-watchtower-updates  # Update the converter intentionally with the stack
@@ -152,10 +152,10 @@ services:
   #
   tika:
     # Docker image and container information
-    <<: *default-container                     # Pull in default container settings
-    image: docker.io/apache/tika:${TIKA_TAG}   # Run the reviewed Apache Tika image version
-    container_name: tika-${TIKA_TAG}           # Append the image tag to the container name
-    hostname: tika                             # Set the internal extraction service hostname
+    <<: *default-container                    # Pull in default container settings
+    image: docker.io/apache/tika:${TIKA_TAG}  # Run the reviewed Apache Tika image version
+    container_name: tika-${TIKA_TAG}          # Append the image tag to the container name
+    hostname: tika                            # Set the internal extraction service hostname
 
     # Apply container labels
     labels: *disable-watchtower-updates  # Update the extractor intentionally with the stack
@@ -176,20 +176,20 @@ services:
     # Define the container environment
     environment:
       # Broker and database connectivity
-      PAPERLESS_REDIS: ${PAPERLESS_REDIS}          # Authenticated Redis broker URL
-      PAPERLESS_DBENGINE: ${PAPERLESS_DBENGINE}    # Select the PostgreSQL database backend
-      PAPERLESS_DBHOST: ${PAPERLESS_DBHOST}        # PostgreSQL service hostname
-      PAPERLESS_DBNAME: ${POSTGRES_DB}             # Paperless database name
-      PAPERLESS_DBUSER: ${POSTGRES_USER}           # Paperless database user
-      PAPERLESS_DBPASS: ${POSTGRES_PASSWORD}       # Paperless database password
+      PAPERLESS_REDIS: ${PAPERLESS_REDIS}        # Authenticated Redis broker URL
+      PAPERLESS_DBENGINE: ${PAPERLESS_DBENGINE}  # Select the PostgreSQL database backend
+      PAPERLESS_DBHOST: ${PAPERLESS_DBHOST}      # PostgreSQL service hostname
+      PAPERLESS_DBNAME: ${POSTGRES_DB}           # Paperless database name
+      PAPERLESS_DBUSER: ${POSTGRES_USER}         # Paperless database user
+      PAPERLESS_DBPASS: ${POSTGRES_PASSWORD}     # Paperless database password
 
       # Runtime identity, public URL, and required signing secret
-      USERMAP_UID: ${DEFAULT_UID}                                         # Map Paperless files to the host user
-      USERMAP_GID: ${DEFAULT_GID}                                         # Map Paperless files to the host group
-      PAPERLESS_TIME_ZONE: ${TZ}                                          # Set the Paperless application timezone
-      PAPERLESS_URL: ${PAPERLESS_URL}                                     # Define the canonical public URL
-      PAPERLESS_CSRF_TRUSTED_ORIGINS: ${PAPERLESS_CSRF_TRUSTED_ORIGINS}   # Trust the configured reverse proxy origin
-      PAPERLESS_SECRET_KEY: ${PAPERLESS_SECRET_KEY}                       # Required stable key for signatures and sessions
+      USERMAP_UID: ${DEFAULT_UID}                                        # Map Paperless files to the host user
+      USERMAP_GID: ${DEFAULT_GID}                                        # Map Paperless files to the host group
+      PAPERLESS_TIME_ZONE: ${TZ}                                         # Set the Paperless application timezone
+      PAPERLESS_URL: ${PAPERLESS_URL}                                    # Define the canonical public URL
+      PAPERLESS_CSRF_TRUSTED_ORIGINS: ${PAPERLESS_CSRF_TRUSTED_ORIGINS}  # Trust the configured reverse proxy origin
+      PAPERLESS_SECRET_KEY: ${PAPERLESS_SECRET_KEY}                      # Required stable key for signatures and sessions
 
       # Initial administrator and document-processing behavior
       PAPERLESS_ADMIN_USER: ${PAPERLESS_ADMIN_USER}                                                        # Initial administrator username
@@ -220,7 +220,7 @@ services:
 
     # Report healthy when the web application responds successfully
     healthcheck:
-      test:                                                # Request the local application endpoint
+      test:  # Request the local application endpoint
         - CMD
         - curl
         - -fsS
@@ -275,7 +275,7 @@ services:
 
     # Report healthy when Paperless-AI accepts local TCP connections
     healthcheck:
-      test:                                                   # Probe the local TCP listener
+      test:  # Probe the local TCP listener
         - CMD-SHELL
         - timeout 10s bash -c ':> /dev/tcp/127.0.0.1/3000' || exit 1
       timeout: ${PAPERLESS_AI_HEALTHCHECK_TIMEOUT}            # Fail if the check exceeds this duration
@@ -293,10 +293,10 @@ services:
 #
 networks:
   default:
-    name: ${COMPOSE_PROJECT_NAME}  # Use the configured project network name
-    ipam:                          # Define static address management boundaries
-      driver: default              # Use Docker's default IPAM driver
-      config:                      # Configure the private network range
-        - subnet: ${COMPOSE_NETWORK_SUBNET}          # Private subnet assigned to the stack
-          ip_range: ${COMPOSE_NETWORK_IP_RANGE}      # Container allocation pool within the subnet
-          gateway: ${COMPOSE_NETWORK_GATEWAY}        # Gateway address within the allocation pool
+    name: ${COMPOSE_PROJECT_NAME}                # Use the configured project network name
+    ipam:                                        # Define static address management boundaries
+      driver: default                            # Use Docker's default IPAM driver
+      config:                                    # Configure the private network range
+        - subnet: ${COMPOSE_NETWORK_SUBNET}      # Private subnet assigned to the stack
+          ip_range: ${COMPOSE_NETWORK_IP_RANGE}  # Container allocation pool within the subnet
+          gateway: ${COMPOSE_NETWORK_GATEWAY}    # Gateway address within the allocation pool

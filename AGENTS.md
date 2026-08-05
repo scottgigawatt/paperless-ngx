@@ -126,6 +126,11 @@ core constraints.
 - Use directory mounts for application state.
 - Reuse the shared restart, security, pull, and logging anchor when appropriate.
 - Add healthchecks only when the image contains the required healthcheck tool.
+- Prefer exec-form `CMD` healthchecks. Use `CMD-SHELL` only when the probe
+  inherently requires shell behavior, and document that constraint.
+- Prefer an upstream application health endpoint over a port-only probe. Use
+  the probe executable's native failure exit status instead of appending a
+  redundant `|| exit 1`.
 - Keep environment variables grouped by owning service and purpose.
 - Keep `example.env` and Compose interpolation synchronized with
   `test/check-compose-env.sh`.

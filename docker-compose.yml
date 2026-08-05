@@ -147,6 +147,20 @@ services:
     # Apply container labels
     labels: *disable-watchtower-updates  # Update the converter intentionally with the stack
 
+    # Report healthy when the conversion API responds successfully
+    healthcheck:
+      test:  # Request the upstream application health endpoint
+        - CMD
+        - curl
+        - -fsS
+        - --max-time
+        - "2"
+        - http://127.0.0.1:3000/health
+      timeout: ${GOTENBERG_HEALTHCHECK_TIMEOUT}            # Fail if the check exceeds this duration
+      interval: ${GOTENBERG_HEALTHCHECK_INTERVAL}          # Run the check at this interval
+      start_period: ${GOTENBERG_HEALTHCHECK_START_PERIOD}  # Allow conversion engines to initialize
+      retries: ${GOTENBERG_HEALTHCHECK_RETRIES}            # Mark unhealthy after this many failures
+
   #
   # Configure Apache Tika to extract text and metadata from Office documents.
   #
@@ -241,7 +255,7 @@ services:
       tika:
         condition: service_started  # Start the text extraction service first
       gotenberg:
-        condition: service_started  # Start the document conversion service first
+        condition: service_healthy  # Wait for document conversion readiness
 
   #
   # Configure the optional Paperless-AI companion service.
@@ -273,11 +287,15 @@ services:
     volumes:
       - ${PAPERLESS_AI_CONFIG_PATH}:/app/data:rw  # Paperless-AI configuration and database
 
-    # Report healthy when Paperless-AI accepts local TCP connections
+    # Report healthy when Paperless-AI is configured and its database responds
     healthcheck:
-      test:  # Probe the local TCP listener
-        - CMD-SHELL
-        - timeout 10s bash -c ':> /dev/tcp/127.0.0.1/3000' || exit 1
+      test:  # Request the upstream application health endpoint
+        - CMD
+        - curl
+        - -fsS
+        - --max-time
+        - "4"
+        - http://127.0.0.1:3000/health
       timeout: ${PAPERLESS_AI_HEALTHCHECK_TIMEOUT}            # Fail if the check exceeds this duration
       interval: ${PAPERLESS_AI_HEALTHCHECK_INTERVAL}          # Run the check at this interval
       start_period: ${PAPERLESS_AI_HEALTHCHECK_START_PERIOD}  # Allow companion initialization work

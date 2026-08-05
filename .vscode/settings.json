@@ -1,6 +1,8 @@
 {
     "cSpell.words": [
+        "adminpass",
         "Bogdan",
+        "bytewise",
         "centurylinklabs",
         "Cerberus",
         "Cloudant",
@@ -9,11 +11,19 @@
         "DBHOST",
         "DBNAME",
         "DBPASS",
+        "DBSSLCERT",
+        "DBSSLKEY",
+        "DBSSLMODE",
+        "DBSSLROOTCERT",
         "DBUSER",
         "elif",
+        "fnmatch",
         "Gotenberg",
         "HADES",
         "healthcheck",
+        "healthchecks",
+        "hostnames",
+        "INOTIFY",
         "isready",
         "Lixandru",
         "ollama",
@@ -23,6 +33,7 @@
         "paperlessuser",
         "PGID",
         "Plundarr",
+        "POOLSIZE",
         "Privateerr",
         "PUID",
         "Pypi",
@@ -38,11 +49,13 @@
         "sysctls",
         "Tantivy",
         "Tika",
+        "unfiled",
         "unredacted",
         "urlsafe",
         "USERMAP",
         "WEBUI",
         "Whoosh",
-        "yourname"
+        "yourname",
+        "zxing"
     ]
 }

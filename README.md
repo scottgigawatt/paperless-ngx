@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD033 MD041 -->
+
 <!--
   Copyright 2025-2026 Scott Gigawatt
 
@@ -59,14 +61,14 @@ version management, safer upgrades, and repository governance.
 
 ## Meet the Infernal Civil Service 📂💀
 
-| Service | Infernal job title | Actual responsibility | Default image version |
-| ------- | ------------------ | --------------------- | --------------------- |
-| Paperless-ngx | Supreme Archivist | Document archive, OCR, search, workflows, and API | `3.0.5` |
-| Paperless-AI | Oracle on administrative leave | Legacy external AI analysis and tagging | `3.0.9` |
-| PostgreSQL | Keeper of the Eternal Ledger | Paperless application database | `18.4` |
-| Redis | Pneumatic-Tube Imp | Broker for background and scheduled work | `8.8.1` |
-| Gotenberg | PDF Forge Master | Office and email conversion to PDF | `8.34.0` |
-| Apache Tika | Translator of Cursed Documents | Office document text and metadata extraction | `3.2.3.0` |
+| Service       | Infernal job title             | Actual responsibility                             | Default image version |
+| ------------- | ------------------------------ | ------------------------------------------------- | --------------------- |
+| Paperless-ngx | Supreme Archivist              | Document archive, OCR, search, workflows, and API | `3.0.5`               |
+| Paperless-AI  | Oracle on administrative leave | Legacy external AI analysis and tagging           | `3.0.9`               |
+| PostgreSQL    | Keeper of the Eternal Ledger   | Paperless application database                    | `18.4`                |
+| Redis         | Pneumatic-Tube Imp             | Broker for background and scheduled work          | `8.8.1`               |
+| Gotenberg     | PDF Forge Master               | Office and email conversion to PDF                | `8.34.0`              |
+| Apache Tika   | Translator of Cursed Documents | Office document text and metadata extraction      | `3.2.3.0`             |
 
 All image versions are configurable in `.env`. The example pins reviewed
 versions instead of floating `latest`, and Renovate proposes future updates as

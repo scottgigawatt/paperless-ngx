@@ -33,10 +33,10 @@ but the checklist is printed on heavier paper and everyone looks haunted.
 
 The official PostgreSQL image requires different container mount targets:
 
-| PostgreSQL version | `POSTGRES_DATA_TARGET` |
-| ------------------ | ---------------------- |
-| 17 and below | `/var/lib/postgresql/data` |
-| 18 and above | `/var/lib/postgresql` |
+| PostgreSQL version | `POSTGRES_DATA_TARGET`     |
+| ------------------ | -------------------------- |
+| 17 and below       | `/var/lib/postgresql/data` |
+| 18 and above       | `/var/lib/postgresql`      |
 
 Changing the image major and mount target does not migrate a database. If an
 existing PostgreSQL 17 service was run with the parent `/var/lib/postgresql`
@@ -144,15 +144,15 @@ for the exact mappings and action items.
 `make check-env` rejects the v2 settings below because Paperless-ngx v3 renamed,
 removed, or deprecated them. Update `.env` before attempting the migration:
 
-| Legacy v2 setting | v3 action |
-| ----------------- | --------- |
-| `PAPERLESS_CONSUMER_POLLING` | Use `PAPERLESS_CONSUMER_POLLING_INTERVAL` |
-| `PAPERLESS_CONSUMER_INOTIFY_DELAY` | Use `PAPERLESS_CONSUMER_STABILITY_DELAY` |
-| `PAPERLESS_CONSUMER_POLLING_DELAY` | Use `PAPERLESS_CONSUMER_STABILITY_DELAY` |
-| `PAPERLESS_CONSUMER_POLLING_RETRY_COUNT` | Remove it; v3 tracks file stability automatically |
-| `PAPERLESS_CONSUMER_BARCODE_SCANNER` | Remove it; v3 uses `zxing-cpp` exclusively |
+| Legacy v2 setting                                                                                                                              | v3 action                                               |
+| ---------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| `PAPERLESS_CONSUMER_POLLING`                                                                                                                   | Use `PAPERLESS_CONSUMER_POLLING_INTERVAL`               |
+| `PAPERLESS_CONSUMER_INOTIFY_DELAY`                                                                                                             | Use `PAPERLESS_CONSUMER_STABILITY_DELAY`                |
+| `PAPERLESS_CONSUMER_POLLING_DELAY`                                                                                                             | Use `PAPERLESS_CONSUMER_STABILITY_DELAY`                |
+| `PAPERLESS_CONSUMER_POLLING_RETRY_COUNT`                                                                                                       | Remove it; v3 tracks file stability automatically       |
+| `PAPERLESS_CONSUMER_BARCODE_SCANNER`                                                                                                           | Remove it; v3 uses `zxing-cpp` exclusively              |
 | `PAPERLESS_DBSSLMODE`, `PAPERLESS_DBSSLROOTCERT`, `PAPERLESS_DBSSLCERT`, `PAPERLESS_DBSSLKEY`, `PAPERLESS_DB_POOLSIZE`, `PAPERLESS_DB_TIMEOUT` | Move the equivalent options into `PAPERLESS_DB_OPTIONS` |
-| `PAPERLESS_OCR_SKIP_ARCHIVE_FILE` | Use `PAPERLESS_ARCHIVE_FILE_GENERATION` |
+| `PAPERLESS_OCR_SKIP_ARCHIVE_FILE`                                                                                                              | Use `PAPERLESS_ARCHIVE_FILE_GENERATION`                 |
 
 The example configuration explicitly sets `PAPERLESS_OCR_MODE=auto` and
 `PAPERLESS_ARCHIVE_FILE_GENERATION=auto`. These preserve upstream v3's automatic

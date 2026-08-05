@@ -79,7 +79,7 @@ services:
 
     # Report healthy when the authenticated broker responds
     healthcheck:
-      test:  # Ping Redis through the bundled client
+      test:                                    # Ping Redis through the bundled client
         - CMD
         - redis-cli
         - ping
@@ -116,7 +116,7 @@ services:
 
     # Report healthy when the configured database accepts connections
     healthcheck:
-      test:  # Query PostgreSQL readiness without printing secrets
+      test:                                       # Query PostgreSQL readiness without printing secrets
         - CMD
         - pg_isready
         - -q
@@ -149,7 +149,7 @@ services:
 
     # Report healthy when the conversion API responds successfully
     healthcheck:
-      test:  # Request the upstream application health endpoint
+      test:                                                # Request the upstream application health endpoint
         - CMD
         - curl
         - -fsS
@@ -234,7 +234,7 @@ services:
 
     # Report healthy when the web application responds successfully
     healthcheck:
-      test:  # Request the local application endpoint
+      test:                                                # Request the local application endpoint
         - CMD
         - curl
         - -fsS
@@ -289,7 +289,7 @@ services:
 
     # Report healthy when Paperless-AI is configured and its database responds
     healthcheck:
-      test:  # Request the upstream application health endpoint
+      test:                                                   # Request the upstream application health endpoint
         - CMD
         - curl
         - -fsS

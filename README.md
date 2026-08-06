@@ -1,7 +1,17 @@
+<!-- markdownlint-disable MD033 MD041 -->
+
+<!--
+  Copyright 2025-2026 Scott Gigawatt
+
+  Licensed under the Apache License, Version 2.0.
+
+  README.md: Operate the HADES Paperless-ngx document archive.
+  -->
+
 <hr />
 
 <p align="center">
-  <em>📜 Star this repo to keep your docs in line and your chaos in check.</em>
+  <em>📜 Star this repo. The Department notices everything, especially unfiled receipts.</em>
 </p>
 
 <p align="center">
@@ -10,10 +20,19 @@
   <img src="https://img.shields.io/github/repo-size/scottgigawatt/paperless-ngx?label=Filing%20Cabinet&color=orange" alt="Repo Size" />
 </p>
 
+<p align="center">
+  <a href="https://github.com/scottgigawatt/paperless-ngx/actions/workflows/validate-pr.yml">
+    <img src="https://github.com/scottgigawatt/paperless-ngx/actions/workflows/validate-pr.yml/badge.svg" alt="Compose validation" />
+  </a>
+  <a href="https://securityscorecards.dev/viewer/?uri=github.com/scottgigawatt/paperless-ngx">
+    <img src="https://api.securityscorecards.dev/projects/github.com/scottgigawatt/paperless-ngx/badge" alt="OpenSSF Scorecard" />
+  </a>
+</p>
+
 <p align="center">─── ⛧ ───</p>
 
 <p align="center">
-    <em>💀 Got rogue PDFs or rebellious receipts? Cast them into the fire and <strong>Enter 🔥HADES🔥</strong>.</em>
+  <em>💀 Got rogue PDFs or rebellious receipts? Submit Form 666-B and <strong>Enter 🔥HADES🔥</strong>.</em>
 </p>
 
 <p align="center">
@@ -24,208 +43,269 @@
 
 <hr />
 
-# Paperless-ngx 🗃️🤖
+# HADES Paperless-ngx 🗃️🔥
 
-Paperless-ngx transforms your mountains of paper clutter into a sleek, searchable, digital archive. Deploy it on your Synology NAS and enjoy the magic of AI-powered document management. No more hunting for receipts like a pirate searching for treasure! 🏴‍☠️📄
+Welcome to **HADES: Highly Automated Document Extraction & Storage**, the
+underworld's premier bureaucracy for turning receipts, statements, manuals, and
+other mortal paper clutter into a searchable digital archive. Nobody escapes
+the paperwork—not even the paperwork.
 
----
+The Department operates on a Synology NAS or any Docker Compose host and
+provides one complete deployment file for Paperless-ngx, Paperless-AI,
+PostgreSQL, Redis, Gotenberg, and Apache Tika. Six containers enter. One tidy
+archive leaves. Legal insists we clarify that the containers also leave.
 
-## Overview 📝
+It remains inspired by the Synology guides from
+[Marius Hosting](https://mariushosting.com/) while adding repeatable validation,
+version management, safer upgrades, and repository governance.
 
-This repository adapts the guides from [**Lixandru Marius Bogdan**](https://github.com/mariushosting) to create a **complete all-in-one deployment** for **Paperless-ngx and Paperless-AI**. It allows you to deploy all services seamlessly onto a **Synology NAS** using **Container Manager** or **Portainer**.
+## Meet the Infernal Civil Service 📂💀
 
-- 📖 **[Paperless-ngx Setup](https://mariushosting.com/synology-install-paperless-ngx-with-office-files-support/)**
-- 🤖 **[Paperless-ngx AI Setup](https://mariushosting.com/how-to-install-paperless-ai-on-your-synology-nas/)**
-- 🖥️ **[Portainer Guide](https://mariushosting.com/synology-how-to-update-portainer/)**
+| Service       | Infernal job title             | Actual responsibility                             | Default image version |
+| ------------- | ------------------------------ | ------------------------------------------------- | --------------------- |
+| Paperless-ngx | Supreme Archivist              | Document archive, OCR, search, workflows, and API | `3.0.5`               |
+| Paperless-AI  | Oracle on administrative leave | Legacy external AI analysis and tagging           | `3.0.9`               |
+| PostgreSQL    | Keeper of the Eternal Ledger   | Paperless application database                    | `18.4`                |
+| Redis         | Pneumatic-Tube Imp             | Broker for background and scheduled work          | `8.8.1`               |
+| Gotenberg     | PDF Forge Master               | Office and email conversion to PDF                | `8.34.0`              |
+| Apache Tika   | Translator of Cursed Documents | Office document text and metadata extraction      | `3.2.3.0`             |
 
-Alternatively, you can use my **[🐳 Docker Compose deployment for Portainer](https://github.com/scottgigawatt/portainer)** to deploy and manage Portainer on your NAS before setting up this project.
+All image versions are configurable in `.env`. The example pins reviewed
+versions instead of floating `latest`, and Renovate proposes future updates as
+reviewable pull requests.
 
-This setup supports:
+> [!NOTE]
+> Paperless-ngx v3 includes its own optional AI features. The separate
+> Paperless-AI service remains in this stack for users who intentionally use its
+> workflow and interface; it is not required for core Paperless operation. The
+> Oracle may therefore be dismissed without collapsing the Department.
 
-- **OCR-Powered Search** 🔍 - Scan, search, and retrieve documents with ease.
-- **AI-Powered Categorization** 🤖 - Let Paperless-ngx AI auto-sort and tag your documents.
-- **Office File Support** 📑 - Convert and manage `.docx`, `.pdf`, and other formats.
-- **Synology NAS Friendly** 🏠 - Deploy with DSM Container Manager or Portainer.
+> [!WARNING]
+> The [Paperless-AI upstream project](https://github.com/clusterzx/paperless-ai)
+> currently describes itself as unmaintained. Its latest `3.0.9` release is the
+> newest available image, not a guarantee of Paperless-ngx v3 compatibility.
+> Existing users should validate it separately with non-sensitive test data and
+> consider a planned move to Paperless-ngx's built-in AI features. Even HADES
+> does not grant production access to an unsupervised oracle.
 
----
+## Mandatory Ritual Pause Before v3 🛑🕯️
 
-## Configuring IPAM and Network Firewall 🌍
+Paperless-ngx v3 requires `PAPERLESS_SECRET_KEY` and can only migrate from
+version `2.20.15`. This is a migration gate, not a suggestion whispered by a
+ghost in Compliance.
 
-This project uses **Docker IPAM (IP Address Management)** to manage container networking. To ensure smooth communication, you may need to configure your **firewall** to allow access based on the defined subnet.
+> [!CAUTION]
+> If this is an existing installation, do not simply pull the v3 image. Read
+> [Upgrading Paperless-ngx](docs/UPGRADING.md), verify the last successful
+> version, complete the `2.20.15` prerequisite when needed, and test a full
+> backup before starting migrations.
 
-### **IPAM Configuration**
+> [!CAUTION]
+> PostgreSQL 17 and below must mount `/var/lib/postgresql/data`; PostgreSQL 18+
+> must mount `/var/lib/postgresql`. If this project previously ran PostgreSQL 17
+> with the newer parent mount, inspect Docker's active volumes and make a logical
+> database backup before any Compose recreate. Changing the mount can hide the
+> current cluster and reveal older files that merely look like the same database.
 
-You can configure the following settings in your [`.env`](example.env) file:
+The v3 upgrade also changes duplicate handling, consumer settings, OCR/archive
+options, advanced database options, search indexing, task history, consume
+scripts, and some reverse-proxy behavior. The repository preserves the old
+duplicate-rejection behavior with
+`PAPERLESS_CONSUMER_DELETE_DUPLICATES=true`; the other changes require review
+against the private deployment.
 
-```bash
-# Define the subnet range for the network
-COMPOSE_NETWORK_SUBNET="${COMPOSE_NETWORK_SUBNET:-172.24.0.0/16}"
+## Open a New Branch Office 🚀🏛️
 
-# Define the IP range for containers
-COMPOSE_NETWORK_IP_RANGE="${COMPOSE_NETWORK_IP_RANGE:-172.24.5.0/24}"
-
-# Define the network gateway
-COMPOSE_NETWORK_GATEWAY="${COMPOSE_NETWORK_GATEWAY:-172.24.5.254}"
-```
-
-### **Updating Firewall Settings on Synology NAS** 🔥
-
-To allow communication for this Docker network, update the **Synology Firewall** settings:
-
-1. Open **Control Panel** → **Security** (under Connectivity).
-2. Navigate to the **Firewall** tab → Click **Edit Rules**.
-3. Click **Create** to add a new rule:
-   - **Ports**: Select `All`
-   - **Source IP**: Select `Specific IP`
-   - Click `Select` → Choose `Subnet`
-   - Enter `172.24.0.0` for **IP Address** and `255.255.0.0` for **Subnet mask/Prefix length**
-   - **Action**: Select `Allow`
-4. Click **OK** to apply the changes.
-
-This ensures that containers using this Docker network can communicate without restrictions.
-
-For more details, check the **[Docker Compose IPAM documentation](https://docs.docker.com/compose/compose-file/06-networks/#ipam)**.
-
----
-
-## Deployment 🚀
-
-This guide walks you through deploying Paperless-ngx using **DSM Container Manager** (recommended for Synology NAS). You can also use **Portainer** if you prefer a different UI.
-
-### **1. Folders Are Pre-Created** 📂
-
-No need to manually create folders—this project automatically sets them up in the `config` directory:
-
-```console
-config/
-├── paperless-ai/
-├── paperless-ngx/
-│   ├── consume/
-│   ├── data/
-│   ├── db/
-│   ├── export/
-│   ├── media/
-│   ├── redis/
-│   ├── trash/
-```
-
-### **2. Copy and Edit the Environment File** 📜
-
-A sample environment file is already included! Simply copy it and update the values as needed:
+### 1. Complete the Entrance Forms 🖋️
 
 ```sh
 cp example.env .env
-vim .env  # Edit with your settings
+python3 -c "import secrets; print(secrets.token_urlsafe(64))"
 ```
 
-### **3. Deploy Using DSM Container Manager** 🏠
+Edit `.env` and:
 
-1. Open **DSM Container Manager**.
-2. Navigate to **Projects** → Click **Create**.
-3. Select **Import YAML** and browse to the `docker-compose.yml` file in the project root.
-4. Click **Next** → Review settings → Click **Apply**.
+- store the generated output as `PAPERLESS_SECRET_KEY`;
+- replace every value beginning with `change-me`;
+- keep the Redis password and the password inside `PAPERLESS_REDIS` identical;
+- align `POSTGRES_DATA_TARGET` with the selected PostgreSQL major version;
+- set the Synology host paths, UID, GID, timezone, URL, and network range;
+- URL-encode special characters used inside `PAPERLESS_REDIS`.
 
-### **4. Alternative Deployment with Portainer** 🖥️
+Yes, HADES requires paperwork before it can eliminate paperwork. This is called
+institutional continuity.
 
-If you prefer **Portainer**, follow these steps:
+> [!IMPORTANT]
+> Keep `PAPERLESS_SECRET_KEY` stable and backed up. Rotating it invalidates
+> active sessions and other signed tokens.
 
-1. Go to **Stacks** in Portainer.
-2. Click **Add Stack** → Name it `paperless`.
-3. Browse to the `docker-compose.yml` file in the project root.
-4. Click **Deploy the Stack**.
-
-### **5. Access the Web Interfaces** 🌐
-
-Once deployed, open your browser and access the service:
-
-- **Paperless-ngx**: `https://paperlessngx.yourname.synology.me`
-
-Log in with your admin credentials and start managing documents! 🏆
-
----
-
-## Docker Compose Configuration 🐳
-
-The full `docker-compose.yml` file is included in the **project root**. Check it out if you want to tweak or customize your deployment.
-
-📄 **[View docker-compose.yml](./docker-compose.yml)**
-
----
-
-## Troubleshooting 🛠️
-
-### **Paperless-ngx can't connect to Redis?** ❌
-
-- Ensure your **firewall rules allow access** to the subnet defined in `COMPOSE_NETWORK_SUBNET`.
-- Make sure your `.env` file has the correct `PAPERLESS_REDIS` value.
-- Run `docker logs paperless` to check for errors.
-- Try restarting the stack with `docker compose down && docker compose up -d`.
-
-#### **Redis Memory Overcommit Warning** ⚠️
-
-If you see the following warning in Redis logs:
-
-```console
-WARNING Memory overcommit must be enabled! Without it, a background save or replication may fail under low memory condition. Being disabled, it can also cause failures without low memory condition, see https://github.com/jemalloc/jemalloc/issues/1328.
-```
-
-This means that **Linux memory overcommit is disabled**, which can cause Redis to fail under low memory conditions. To fix this, update your system configuration:
+Validate the private settings without printing them:
 
 ```sh
-sudo vim /etc/sysctl.conf
+make check-env
+make config
 ```
 
-Add these lines to make the changes persistent:
+### 2. Recite the Approved Incantations 🔥
 
 ```sh
-vm.overcommit_memory = 1
+make pull
+make up
+make ps
 ```
 
-Then apply the changes:
+Follow the first startup until database migrations and the Paperless healthcheck
+finish:
 
 ```sh
-sudo sysctl vm.overcommit_memory=1
+make logs
 ```
 
-Or reboot your NAS for the changes to take effect.
+### 3. Establish a Synology Annex 🏢
 
-#### **Redis TCP Backlog Warning** ⚠️
+1. Place `docker-compose.yml`, `.env`, and the checked-in `config/` directory in
+   the project folder on the NAS.
+2. Open **Container Manager → Project → Create**.
+3. Choose the project path and import `docker-compose.yml`.
+4. Review the rendered services, ports, volumes, and private subnet.
+5. Build the project and inspect the Paperless logs before logging in.
 
-If you see this warning:
+The same root `docker-compose.yml` is also suitable for a Portainer stack. No
+overlay files or generated Compose fragments are required.
 
-```console
-WARNING: The TCP backlog setting of 511 cannot be enforced because /proc/sys/net/core/somaxconn is set to the lower value of 128.
+## Forms Required by the Ministry 🧭📜
+
+The root [`example.env`](example.env) is the complete settings reference for this
+deployment. The most important groups are:
+
+- private Docker network and Synology firewall range;
+- container identity, timezone, and log rotation;
+- pinned service image versions;
+- Redis, PostgreSQL, administrator, and Paperless signing secrets;
+- reverse-proxy URL and CSRF origin;
+- OCR, duplicate, task-worker, and Office parsing behavior;
+- persistent host paths and published web ports.
+
+Paperless-ngx listens on `${PAPERLESS_WEBUI_PORT}` and Paperless-AI listens on
+`${PAPERLESS_AI_WEBUI_PORT}`. Put internet-facing access behind a properly
+configured TLS reverse proxy; do not expose internal Redis, PostgreSQL, Tika, or
+Gotenberg ports.
+
+### Draw the Network Pentagram Carefully 🛜
+
+The example reserves:
+
+```text
+Subnet:  172.24.0.0/16
+Range:   172.24.5.0/24
+Gateway: 172.24.5.254
 ```
 
-This means the system's **TCP connection backlog is too low**, which could cause Redis to drop connections under high load. To fix it:
+Choose an unused private subnet that does not overlap the NAS, VPN, LAN, or
+another Docker network. If the Synology firewall filters Docker bridge traffic,
+allow only the selected subnet and necessary published web ports.
+
+Overlapping subnets are how two departments accidentally summon the same
+printer. Nobody wants another incident report from Accounting.
+
+## Approved Incantations 🛠️✨
+
+```text
+make help             Show supported commands
+make check-env        Reject missing and placeholder private settings
+make config           Validate docker-compose.yml with .env
+make config-example   Validate the checked-in example with CI-only secrets
+make validate         Run repository-owned configuration checks
+make pull             Pull configured image versions
+make up               Start or update the stack
+make down             Stop the stack without deleting application data
+make restart          Recreate the stack
+make ps               Show service health and status
+make logs             Follow logs from the stack
+```
+
+`make down` deliberately avoids `--volumes`. This project does not provide a
+one-command nuke target for irreplaceable documents and database state. HADES
+has standards, a retention policy, and a shredder that requires three managers
+to turn three separate keys. 🔥
+
+## Where the Bodies—Sorry, Files—Are Buried 💾⚰️
+
+The checked-in directories retain only `.gitignore` files. Live data belongs in
+the host paths configured by `.env`:
+
+```text
+config/
+├── paperless-ai/
+└── paperless-ngx/
+    ├── consume/
+    ├── data/
+    ├── db/
+    ├── export/
+    ├── media/
+    ├── redis/
+    └── trash/
+```
+
+Back up PostgreSQL, Paperless `data`, `media`, and `export`, Paperless-AI data,
+and `.env`. Test restoration away from the live paths before relying on the
+backup. PostgreSQL major-version upgrades require their own reviewed migration;
+changing `POSTGRES_TAG` is not a database upgrade plan.
+
+If your backup has never been restored, it is not a backup; it is an optimistic
+collection of bytes wearing a tiny safety vest.
+
+## Complaints Window and Exorcism Desk 🔎🧯
+
+### `PAPERLESS_SECRET_KEY is not set`
+
+Paperless-ngx v3 refuses to start without a unique signing key. Generate it,
+store it in `.env`, then recreate the service:
 
 ```sh
-sudo vim /etc/sysctl.conf
+python3 -c "import secrets; print(secrets.token_urlsafe(64))"
+make check-env
+make up
 ```
 
-Add this line:
+Do not paste the generated value into an issue or log.
 
-```sh
-net.core.somaxconn = 65535
-```
+### The Pneumatic-Tube Imp Is Missing
 
-Then apply the changes:
+- Confirm Redis is healthy with `make ps`.
+- Keep `REDIS_PASSWORD` and the password in `PAPERLESS_REDIS` synchronized.
+- Use `redis://:<URL-encoded-password>@redis:6379` for password-only auth.
+- Confirm the custom subnet does not overlap another network.
 
-```sh
-sudo sysctl net.core.somaxconn=65535
-```
+### The Supreme Archivist Is Unwell After an Upgrade
 
-Or reboot your NAS for the changes to take effect.
+- Check that the prior v2 release was exactly `2.20.15` before v3 migration.
+- Review the explicit OCR and archive-generation policies and remove settings
+  retired or renamed by v3; `make check-env` identifies known obsolete keys.
+- Inspect migration and index-rebuild output with `make logs`.
+- Review the [official v3 migration guide](https://docs.paperless-ngx.com/migration-v3/).
+- Restore the verified pre-upgrade backup if the documented rollback boundary is
+  reached; do not repeatedly restart a failing migration and hope it becomes
+  paperwork jazz.
 
-### **Can't access the web interfaces?** 🌍
+### Cerberus Returns `403` at the Archive Gate
 
-- Ensure the correct NAS IP and port are used.
-- Run `docker ps` to check if all containers are running.
+Confirm `PAPERLESS_URL` and `PAPERLESS_CSRF_TRUSTED_ORIGINS`. Paperless v3 may
+also require trusted-proxy settings for login rate limiting; follow the upstream
+configuration guide for the actual proxy hop count and forwarded client-IP
+header.
 
----
+## Infernal Employee Handbook 📚🔥
 
-## Conclusion 🎉
+- [Upgrading Paperless-ngx](docs/UPGRADING.md)
+- [Contributing](docs/CONTRIBUTING.md)
+- [Security policy](docs/SECURITY.md)
+- [Paperless-ngx configuration](https://docs.paperless-ngx.com/configuration/)
+- [Paperless-ngx administration](https://docs.paperless-ngx.com/administration/)
+- [Paperless-AI documentation](https://clusterzx.github.io/paperless-ai/)
+- [Marius Hosting Paperless-ngx guide](https://mariushosting.com/synology-install-paperless-ngx-with-office-files-support/)
+- [Marius Hosting Paperless-AI guide](https://mariushosting.com/how-to-install-paperless-ai-on-your-synology-nas/)
 
-Congratulations! 🎊 You've set up **Paperless-ngx, and Paperless-AI** on your Synology NAS. Now you can manage documents efficiently using AI models. 🚀🗃️🤖
-
-For more advanced configurations, check out the [official Paperless-ngx documentation](https://docs.paperless-ngx.com) and [Paperless-AI documentation](https://clusterzx.github.io/paperless-ai/).
+Bring order to the Eternal Archive, keep secrets behind Cerberus, and may every
+OCR job find its correspondent before the quarterly performance review. HADES:
+because death is temporary, but records retention is forever. 🗃️🔥💀

@@ -1,0 +1,9 @@
+blank_issues_enabled: false
+
+contact_links:
+  - name: "🔥HADES🔥"
+    url: https://discord.gg/BpEGzWwGYf
+    about: "Need live help with a stubborn filing demon? Ask the crew."
+  - name: "Paperless-ngx upstream support"
+    url: https://github.com/paperless-ngx/paperless-ngx/discussions
+    about: "Ask upstream application questions that are not specific to this Compose deployment."

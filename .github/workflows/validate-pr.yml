@@ -1,0 +1,59 @@
+#
+# Copyright 2025-2026 Scott Gigawatt
+#
+# Licensed under the Apache License, Version 2.0.
+#
+# validate-pr.yml: Validate the Paperless-ngx Compose deployment and repository.
+#
+
+name: "Audit the Filing Cabinet 🧪🗃️"
+
+#
+# Run the complete validation pass for every pull request targeting main. The
+# broad path rule makes this workflow the repository's dependable merge gate.
+#
+on:
+    pull_request:
+        branches:
+            - main
+        paths:
+            - "**"
+
+permissions:
+    contents: read
+
+jobs:
+    #
+    # Render the complete example deployment and enforce repository lint,
+    # workflow, secret, shell, YAML, and Compose environment policy.
+    #
+    validate-pr:
+        name: "Inspect Every Drawer 🔎"
+        runs-on: ubuntu-latest
+        timeout-minutes: 15
+        permissions:
+            contents: read
+
+        steps:
+            #
+            # Check out the repository without retaining credentials before any
+            # project-owned validation command or third-party hook executes.
+            #
+            - name: "Retrieve the Archive Map 🗺️"
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
+              with:
+                  persist-credentials: false
+
+            #
+            # Render the checked-in example through the same Makefile interface
+            # maintainers use locally, including environment parity checks.
+            #
+            - name: "Render the Example Cabinet 📐"
+              run: make validate
+
+            #
+            # Finish with formatting, secret, workflow, YAML, and shell checks
+            # so cosmetic changes cannot conceal policy or syntax drift.
+            #
+            - name: "Dust Every Configuration Shelf 🧹"
+              uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd  # v3.0.1

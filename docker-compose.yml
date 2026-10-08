@@ -133,10 +133,10 @@ services:
   #
   gotenberg:
     # Docker image and container information
-    <<: *default-container                                 # Pull in default container settings
-    image: docker.io/gotenberg/gotenberg:${GOTENBERG_TAG}  # Run the reviewed Gotenberg image version
-    container_name: gotenberg-${GOTENBERG_TAG}             # Append the image tag to the container name
-    hostname: gotenberg                                    # Set the internal conversion service hostname
+    <<: *default-container                       # Pull in default container settings
+    image: gotenberg/gotenberg:${GOTENBERG_TAG}  # Run the reviewed Gotenberg image version
+    container_name: gotenberg-${GOTENBERG_TAG}   # Append the image tag to the container name
+    hostname: gotenberg                          # Set the internal conversion service hostname
 
     # Disable browser JavaScript while allowing local conversion inputs
     command:
@@ -166,10 +166,10 @@ services:
   #
   tika:
     # Docker image and container information
-    <<: *default-container                    # Pull in default container settings
-    image: docker.io/apache/tika:${TIKA_TAG}  # Run the reviewed Apache Tika image version
-    container_name: tika-${TIKA_TAG}          # Append the image tag to the container name
-    hostname: tika                            # Set the internal extraction service hostname
+    <<: *default-container            # Pull in default container settings
+    image: apache/tika:${TIKA_TAG}    # Run the reviewed Apache Tika image version
+    container_name: tika-${TIKA_TAG}  # Append the image tag to the container name
+    hostname: tika                    # Set the internal extraction service hostname
 
     # Apply container labels
     labels: *disable-watchtower-updates  # Update the extractor intentionally with the stack
@@ -268,10 +268,10 @@ services:
   #
   paperless-ai:
     # Docker image and container information
-    <<: *default-container                                       # Pull in default container settings
-    image: docker.io/clusterzx/paperless-ai:${PAPERLESS_AI_TAG}  # Run the reviewed Paperless-AI version
-    container_name: paperless-ai-${PAPERLESS_AI_TAG}             # Append the image tag to the container name
-    hostname: paperless-ai                                       # Set the internal companion hostname
+    <<: *default-container                             # Pull in default container settings
+    image: clusterzx/paperless-ai:${PAPERLESS_AI_TAG}  # Run the reviewed Paperless-AI version
+    container_name: paperless-ai-${PAPERLESS_AI_TAG}   # Append the image tag to the container name
+    hostname: paperless-ai                             # Set the internal companion hostname
 
     # Drop all Linux capabilities from the companion container
     cap_drop:

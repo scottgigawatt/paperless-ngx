@@ -48,12 +48,12 @@ services:
   #
   redis:
     # Docker image and container information
-    <<: *default-container                       # Pull in default container settings
-    image: docker.io/library/redis:${REDIS_TAG}  # Run the reviewed Redis image version
-    container_name: redis-${REDIS_TAG}           # Append the image tag to the container name
-    hostname: redis                              # Set the internal service hostname
-    user: ${DEFAULT_UID}:${DEFAULT_GID}          # Run with the configured host identity
-    read_only: true                              # Keep the container root filesystem read-only
+    <<: *default-container               # Pull in default container settings
+    image: redis:${REDIS_TAG}            # Use the short name for Synology image tracking
+    container_name: redis-${REDIS_TAG}   # Append the image tag to the container name
+    hostname: redis                      # Set the internal service hostname
+    user: ${DEFAULT_UID}:${DEFAULT_GID}  # Run with the configured host identity
+    read_only: true                      # Keep the container root filesystem read-only
 
     # Tune the broker connection queue
     sysctls:
@@ -96,10 +96,10 @@ services:
   #
   postgres:
     # Docker image and container information
-    <<: *default-container                             # Pull in default container settings
-    image: docker.io/library/postgres:${POSTGRES_TAG}  # Run the reviewed PostgreSQL image version
-    container_name: postgres-${POSTGRES_TAG}           # Append the image tag to the container name
-    hostname: postgres                                 # Set the internal database hostname
+    <<: *default-container                    # Pull in default container settings
+    image: postgres:${POSTGRES_TAG}           # Use the short name for Synology image tracking
+    container_name: postgres-${POSTGRES_TAG}  # Append the image tag to the container name
+    hostname: postgres                        # Set the internal database hostname
 
     # Apply container labels
     labels: *disable-watchtower-updates  # Update the database intentionally with the stack

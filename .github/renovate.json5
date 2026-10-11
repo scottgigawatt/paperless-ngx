@@ -1,5 +1,14 @@
+//
+// Copyright 2025-2026 Scott Gigawatt
+//
+// Licensed under the Apache License, Version 2.0.
+//
+// renovate.json5: Automated dependency update policy for the Paperless deployment.
+//
 {
+    //
     // Renovate schema and shared safe defaults.
+    //
     "$schema": "https://docs.renovatebot.com/renovate-schema.json",
     "extends": [
         "config:recommended",
@@ -7,21 +16,43 @@
         ":enablePreCommit"
     ],
 
+    //
     // Keep dependency work predictable for a single-maintainer repository.
+    //
     "timezone": "America/New_York",
-    "schedule": ["before 8am"],
+    "schedule": ["* 0-7 1 * *"],
+    "automergeSchedule": ["* 0-7 1 * *"],
+    "updateNotScheduled": false,
+    "prConcurrentLimit": 2,
     "dependencyDashboard": true,
 
+    //
     // Merge dependency PRs after required checks pass; keep branches current.
+    //
     "automerge": true,
     "automergeType": "pr",
     "automergeStrategy": "squash",
-    "platformAutomerge": true,
+    "platformAutomerge": false,
     "rebaseWhen": "behind-base-branch",
     "assignees": ["scottgigawatt"],
     "reviewers": ["scottgigawatt"],
 
+    //
+    // Propose security fixes immediately in separate PRs for manual review.
+    //
+    "vulnerabilityAlerts": {
+        "enabled": true,
+        "dependencyDashboardApproval": false,
+        "groupName": null,
+        "automerge": false,
+        "schedule": ["at any time"],
+        "automergeSchedule": ["at any time"],
+        "updateNotScheduled": true
+    },
+
+    //
     // Renovate owns the repository's Compose, workflow, and hook updates.
+    //
     "enabledManagers": [
         "custom.regex",
         "docker-compose",
@@ -29,7 +60,9 @@
         "pre-commit"
     ],
 
+    //
     // Track image versions defined in example.env instead of directly in YAML.
+    //
     "customManagers": [
         {
             "customType": "regex",
@@ -43,7 +76,9 @@
         }
     ],
 
+    //
     // Keep related dependency updates grouped for one coordinated review.
+    //
     "packageRules": [
         {
             "groupName": "GitHub Actions",
@@ -56,6 +91,34 @@
         {
             "groupName": "Pre-commit hooks",
             "matchManagers": ["pre-commit"]
+        },
+
+        //
+        // Combine routine tooling updates during the monthly maintenance window.
+        //
+        {
+            "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+            "groupName": "monthly maintenance"
+        },
+
+        //
+        // Keep shared image pins together in the weekly production window.
+        //
+        {
+            "matchDatasources": ["docker"],
+            "schedule": ["* 0-7 * * 1"],
+            "automergeSchedule": ["* 0-7 * * 1"],
+            "groupName": "weekly production dependencies"
+        },
+
+        //
+        // Require dashboard approval for major upgrades and keep them separate.
+        //
+        {
+            "matchUpdateTypes": ["major"],
+            "dependencyDashboardApproval": true,
+            "automerge": false,
+            "groupName": null
         }
     ]
 }

@@ -38,8 +38,8 @@ repository, HADES expands to **Highly Automated Document Extraction & Storage**:
 an absurdly overstaffed underworld bureaucracy where receipts are summoned,
 OCR is mandatory, PostgreSQL keeps the eternal ledger, Redis operates the
 pneumatic tubes, Gotenberg runs the PDF forge, Tika translates cursed Office
-files, and Paperless-AI is the optional oracle currently on administrative
-leave.
+files, and Paperless-AI is the optional oracle with a security
+badge.
 
 Make the prose genuinely funny, theatrical, and visually readable while keeping
 every command and operational claim exact. Reuse the same infernal-office

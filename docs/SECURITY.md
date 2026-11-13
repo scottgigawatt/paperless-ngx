@@ -63,7 +63,7 @@ into GitHub. He cannot operate a credit-monitoring portal with his paws.
 - Keep GitHub Actions pinned to full commit SHAs with minimal permissions.
 - Run `make check-env`, `make validate`, and pre-commit before deployment changes.
 - Follow upstream Paperless security advisories and migration guides.
-- Treat the currently unmaintained external Paperless-AI companion as optional,
+- Treat the external Paperless-AI companion as optional,
   avoid public exposure, and reassess it against Paperless-ngx's built-in AI.
 
 Paperless-ngx, Paperless-AI, PostgreSQL, Redis, Gotenberg, and Apache Tika are

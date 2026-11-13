@@ -61,14 +61,14 @@ version management, safer upgrades, and repository governance.
 
 ## Meet the Infernal Civil Service 📂💀
 
-| Service       | Infernal job title             | Actual responsibility                             | Default image version |
-| ------------- | ------------------------------ | ------------------------------------------------- | --------------------- |
-| Paperless-ngx | Supreme Archivist              | Document archive, OCR, search, workflows, and API | `3.0.5`               |
-| Paperless-AI  | Oracle on administrative leave | Legacy external AI analysis and tagging           | `3.0.9`               |
-| PostgreSQL    | Keeper of the Eternal Ledger   | Paperless application database                    | `18.4`                |
-| Redis         | Pneumatic-Tube Imp             | Broker for background and scheduled work          | `8.8.1`               |
-| Gotenberg     | PDF Forge Master               | Office and email conversion to PDF                | `8.34.0`              |
-| Apache Tika   | Translator of Cursed Documents | Office document text and metadata extraction      | `3.2.3.0`             |
+| Service | Infernal job title | Actual responsibility | Default image version |
+| --- | --- | --- | --- |
+| Paperless-ngx | Supreme Archivist | Document archive, OCR, search, workflows, and API | `3.4.2` |
+| Paperless-AI | Oracle with a security badge | Optional document analysis, tagging, and archive chat | `4.0.0` |
+| PostgreSQL | Keeper of the Eternal Ledger | Paperless application database | `18.7` |
+| Redis | Pneumatic-Tube Imp | Broker for background and scheduled work | `8.10.3` |
+| Gotenberg | PDF Forge Master | Office and email conversion to PDF | `8.40.0` |
+| Apache Tika | Translator of Cursed Documents | Office document text and metadata extraction | `3.3.3.0` |
 
 All image versions are configurable in `.env`. The example pins reviewed
 versions instead of floating `latest`, and Renovate proposes future updates as
@@ -81,12 +81,7 @@ reviewable pull requests.
 > Oracle may therefore be dismissed without collapsing the Department.
 
 > [!WARNING]
-> The [Paperless-AI upstream project](https://github.com/clusterzx/paperless-ai)
-> currently describes itself as unmaintained. Its latest `3.0.9` release is the
-> newest available image, not a guarantee of Paperless-ngx v3 compatibility.
-> Existing users should validate it separately with non-sensitive test data and
-> consider a planned move to Paperless-ngx's built-in AI features. Even HADES
-> does not grant production access to an unsupervised oracle.
+> Paperless-AI versions before `4.0.0` allow unauthenticated setup changes, and upstream reports active exploitation. The example now pins the fixed v4 release. Follow the [Paperless-AI upgrade and recovery steps](docs/UPGRADING.md#return-the-oracle-with-a-security-badge-) before migrating an existing instance.
 
 ## Mandatory Ritual Pause Before v3 🛑🕯️
 

@@ -64,7 +64,7 @@ posture.
 
 ## Pay the Paperless-ngx v3 Tollkeeper 🛑
 
-The checked-in example currently pins Paperless-ngx `3.0.5`. Upstream requires
+The checked-in example currently pins Paperless-ngx `3.4.2`. Upstream requires
 all v3 upgrades to start from `2.20.15`.
 
 If the existing instance is older than `2.20.15`:
@@ -165,20 +165,19 @@ leaving it in an invisible desk drawer.
 > policy are not all one-for-one substitutions. HADES has rejected Form 27-B,
 > "It Had Basically the Same Name," for being how incidents get promoted.
 
-## The Optional Oracle Is on Administrative Leave 🔮
+## Return the Oracle With a Security Badge 🔮
 
-The external `clusterzx/paperless-ai` project currently describes itself as
-unmaintained, while Paperless-ngx v3 now includes official AI functionality. The
-latest external image is still pinned for existing deployments, but its version
-number does not establish compatibility with Paperless-ngx v3.
+[Paperless-AI `4.0.0`](https://github.com/clusterzx/paperless-ai/releases/tag/v4.0.0) restores maintained support for Paperless-ngx 2.x and 3.x and fixes the unauthenticated setup takeover affecting all earlier versions. Upstream reports active exploitation. Review its [v4 migration and recovery guide](https://github.com/clusterzx/paperless-ai/blob/v4.0.0/README.md#upgrading-from-3x) before changing an existing deployment.
 
-Test the companion separately with non-sensitive documents after the core v3
-migration is healthy. If it fails, stop the Paperless-AI service and preserve its
-data for a deliberate migration or troubleshooting pass. Do not mix an optional
-AI integration failure with the database migration rollback decision.
+1. Stop the companion and back up its complete `PAPERLESS_AI_CONFIG_PATH` directory separately from the core archive backup.
+2. If an internet-reachable v3 instance has unexpected credentials or endpoints, preserve the old data for investigation and configure v4 with a new empty data directory. Replace its Paperless API token and AI-provider keys and review access logs. Do not migrate suspected compromised settings.
+3. Set `PAPERLESS_AI_TAG=4.0.0` in `.env`. Keep the existing `/app/data` mount for trusted migrations. V4 imports legacy state at first start and retains the old files; its rebuilt search index can download an embedding model.
+4. Remove obsolete `PUID`, `PGID`, and `RAG_SERVICE_URL` companion settings and `RAG_SERVICE_ENABLED` unless an environment override is intentional. The checked-in Compose service now runs with `DEFAULT_UID:DEFAULT_GID`; ensure that identity can write the companion data directory. Its healthcheck uses Node, which is included in v4.
+5. Start only the companion after the core archive is healthy. Confirm migration messages, sign in with the existing account, review settings, and test with a non-sensitive document. Complete initial setup behind restricted access.
 
-Never let an optional oracle hold the Eternal Ledger hostage. Migrate the core
-archive first; invite prophecy only after the records stop screaming.
+Configuration rollback does not undo document metadata already changed by the companion. The retained v3 files also omit changes made in v4; keep the verified backup until the migration is accepted.
+
+The Oracle has returned from administrative leave. Security has confiscated its master key.
 
 ## Raise the New Stack Carefully ⚡
 
@@ -202,7 +201,7 @@ Confirm all of the following before considering the upgrade complete:
 
 If Paperless-AI fails against v3, stop that companion while keeping the core
 Paperless, PostgreSQL, Redis, Tika, and Gotenberg services running. Do not treat
-an unmaintained optional integration as a reason to roll a healthy core archive
+an optional integration as a reason to roll a healthy core archive
 back without first separating the failures.
 
 Keep the pre-upgrade backup until normal operation has been verified for several

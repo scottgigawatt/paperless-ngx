@@ -65,7 +65,7 @@ version management, safer upgrades, and repository governance.
 | --- | --- | --- | --- |
 | Paperless-ngx | Supreme Archivist | Document archive, OCR, search, workflows, and API | `3.4.2` |
 | Paperless-AI | Oracle with a security badge | Optional document analysis, tagging, and archive chat | `4.0.0` |
-| PostgreSQL | Keeper of the Eternal Ledger | Paperless application database | `18.6` |
+| PostgreSQL | Keeper of the Eternal Ledger | Paperless application database | `18.7` |
 | Redis | Pneumatic-Tube Imp | Broker for background and scheduled work | `8.10.3` |
 | Gotenberg | PDF Forge Master | Office and email conversion to PDF | `8.40.0` |
 | Apache Tika | Translator of Cursed Documents | Office document text and metadata extraction | `3.3.3.0` |

@@ -165,6 +165,12 @@ leaving it in an invisible desk drawer.
 > policy are not all one-for-one substitutions. HADES has rejected Form 27-B,
 > "It Had Basically the Same Name," for being how incidents get promoted.
 
+## Keep the Conversion Clerks Compatible 📄
+
+Use the reviewed Gotenberg `8.40.0` and Apache Tika `3.3.3.0` pins with Paperless-ngx `3.4.2`. Newer major versions are available, but their APIs differ from the clients bundled with this Paperless release. Gotenberg 9 removes the `pdfa` form field used for archival conversion; Tika 4 removes the `/tika/form` endpoint used by the current Tika client. A green healthcheck or Compose validation does not exercise those conversion paths.
+
+Leave the [Gotenberg 9 proposal](https://github.com/scottgigawatt/paperless-ngx/pull/37) as a draft until Paperless and its clients support the new APIs and a disposable Office-to-PDF/A conversion succeeds. Review the [Gotenberg migration guide](https://gotenberg.dev/docs/getting-started/upgrade) and [Paperless Tika 4 compatibility report](https://github.com/paperless-ngx/paperless-ngx/issues/13755) before changing either major version. Keep compatible patch and security updates under review; do not disable archival output to make an incompatible update pass.
+
 ## Return the Oracle With a Security Badge 🔮
 
 [Paperless-AI `4.0.0`](https://github.com/clusterzx/paperless-ai/releases/tag/v4.0.0) restores maintained support for Paperless-ngx 2.x and 3.x and fixes the unauthenticated setup takeover affecting all earlier versions. Upstream reports active exploitation. Review its [v4 migration and recovery guide](https://github.com/clusterzx/paperless-ai/blob/v4.0.0/README.md#upgrading-from-3x) before changing an existing deployment.

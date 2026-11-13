@@ -268,22 +268,18 @@ services:
   #
   paperless-ai:
     # Docker image and container information
-    <<: *default-container                             # Pull in default container settings
+    <<: *default-container                           # Pull in default container settings
     image: clusterzx/paperless-ai:${PAPERLESS_AI_TAG}  # Run the reviewed Paperless-AI version
     container_name: paperless-ai-${PAPERLESS_AI_TAG}   # Append the image tag to the container name
-    hostname: paperless-ai                             # Set the internal companion hostname
+    hostname: paperless-ai                           # Set the internal companion hostname
+    user: ${DEFAULT_UID}:${DEFAULT_GID}               # Run Node with the host data directory owner
 
     # Drop all Linux capabilities from the companion container
     cap_drop:
       - ALL  # Remove capabilities not required by Paperless-AI
 
     # Apply container labels
-    labels: *disable-watchtower-updates  # Update the unmaintained companion only after review
-
-    # Define the container environment
-    environment:
-      PUID: ${DEFAULT_UID}  # Map companion files to the host user
-      PGID: ${DEFAULT_GID}  # Map companion files to the host group
+    labels: *disable-watchtower-updates  # Review companion upgrades before deployment
 
     # Publish the Paperless-AI web interface
     ports:
@@ -293,15 +289,13 @@ services:
     volumes:
       - ${PAPERLESS_AI_CONFIG_PATH}:/app/data:rw  # Paperless-AI configuration and database
 
-    # Report healthy when Paperless-AI is configured and its database responds
+    # Use the Node runtime included in v4; the image does not ship curl
     healthcheck:
       test:  # Request the upstream application health endpoint
         - CMD
-        - curl
-        - -fsS
-        - --max-time
-        - "4"
-        - http://127.0.0.1:3000/health
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/health', {signal: AbortSignal.timeout(4000)}).then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
       timeout: ${PAPERLESS_AI_HEALTHCHECK_TIMEOUT}            # Fail if the check exceeds this duration
       interval: ${PAPERLESS_AI_HEALTHCHECK_INTERVAL}          # Run the check at this interval
       start_period: ${PAPERLESS_AI_HEALTHCHECK_START_PERIOD}  # Allow companion initialization work

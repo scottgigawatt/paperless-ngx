@@ -16,19 +16,22 @@ assignees: scottgigawatt
 
 # Form DOC-13: Amend the Infernal Employee Handbook 📚🖋️
 
-**Which decree needs clearer mortal words?**
+## Affected instructions
+
 Name the file, section, command, or example.
 
-**Requested amendment**
-What should the documentation explain?
+## Reader task and problem
 
-**Suggested wording or authoritative scroll**
+What task were you trying to complete, what did you already know, and where did you get stuck? Describe the result you expected and what happened instead.
+
+## Suggested wording or source
+
 Share a draft or authoritative upstream link if available.
 
-**Approved incantation or deployment involved**
-Examples: `make validate`, `make config`, Synology Container Manager import,
-Paperless v3 migration, reverse proxy, or Paperless-AI setup.
+## Command or deployment involved
 
-**Marginalia from the mortal realm**
-Include only redacted, non-sensitive information. Blood-red ink is optional;
-Markdown is strongly preferred.
+Examples: `make validate`, `make config`, Synology Container Manager import, Paperless v3 migration, reverse proxy, or Paperless-AI setup.
+
+## Additional context
+
+Include only redacted, non-sensitive information. Blood-red ink is optional; Markdown is strongly preferred.

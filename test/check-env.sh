@@ -14,6 +14,7 @@
 #   - Rejects missing and known placeholder credentials.
 #   - Enforces a minimum Paperless signing-key length.
 #   - Rejects the example Redis URL and public Paperless hostname.
+#   - Requires an explicit companion hostname without wildcard host access.
 #   - Rejects removed, renamed, or deprecated Paperless-ngx v3 settings.
 #   - Validates the explicit v3 OCR and archive-generation policies.
 #   - Keeps the PostgreSQL image major version and data target synchronized.
@@ -161,6 +162,26 @@ paperless_url=$(read_value PAPERLESS_URL)
 case "${paperless_url}" in
     ""|*yourname.synology.me*)
         report_failure "PAPERLESS_URL is missing or still uses the example hostname."
+        ;;
+esac
+
+#
+# Keep the companion API hostname explicit after Paperless 3.5 tightened its
+# defaults. The canonical PAPERLESS_URL hostname is added by Paperless itself.
+#
+paperless_allowed_hosts=$(read_value PAPERLESS_ALLOWED_HOSTS)
+
+case ",${paperless_allowed_hosts}," in
+    *,paperless-ngx,*)
+        ;;
+    *)
+        report_failure "PAPERLESS_ALLOWED_HOSTS must include paperless-ngx for the companion API connection."
+        ;;
+esac
+
+case "${paperless_allowed_hosts}" in
+    *\**)
+        report_failure "PAPERLESS_ALLOWED_HOSTS must list specific hostnames or IP addresses instead of a wildcard."
         ;;
 esac
 

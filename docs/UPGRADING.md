@@ -6,18 +6,17 @@
   UPGRADING.md: Safe upgrade rituals for the HADES Paperless-ngx deployment.
   -->
 
-# Upgrade HADES Without Summoning Middle Management 🔥📁
+# Upgrade HADES safely 🔥📁
 
-Paperless upgrades may run irreversible database migrations. Treat the image tag
-as application code, not as a decorative label. The most dangerous creature in
-the underworld is not a filing demon; it is a confident operator with an
-untested backup and `latest` in their clipboard.
+Use this guide before changing an existing HADES deployment. For a new archive, use [setup](setup.md); for ordinary backups and diagnosis, use [operations](operations.md).
 
-## Before Every Séance 🕯️
+Paperless upgrades may run irreversible database migrations. Treat the image tag as application code, not as a decorative label. The most dangerous creature in the underworld is not a filing demon; it is a confident operator with an untested backup and `latest` in their clipboard.
+
+## Prepare for every upgrade
 
 1. Read the [Paperless-ngx administration guide](https://docs.paperless-ngx.com/administration/)
    and the release notes for the target version.
-2. Back up PostgreSQL, `data`, `media`, `export`, Paperless-AI data, and `.env`.
+2. Back up PostgreSQL, `data`, `media`, `export`, the complete Paperless-AI data directory, and `.env`. Use a consistent database backup; copying live database files is insufficient. Preserve pending consumption and retained trash when required. See [backup and recovery](operations.md#back-up-and-verify-recovery).
 3. Confirm the backup can be restored somewhere other than the live paths.
 4. Record the currently running Paperless-ngx version.
 5. Run `make config` and resolve every configuration error before pulling images.
@@ -26,10 +25,9 @@ untested backup and `latest` in their clipboard.
 > A valid Compose file is not proof that a database migration is safe. Never
 > replace a major image version until the required upgrade path is confirmed.
 
-HADES calls this the Change Control Ritual. It resembles ordinary preparation,
-but the checklist is printed on heavier paper and everyone looks haunted.
+HADES calls this the Change Control Ritual. It resembles ordinary preparation, but the checklist is printed on heavier paper and everyone looks haunted.
 
-## PostgreSQL Moved the Eternal Ledger Downstairs 🐘📚
+## Review PostgreSQL data mounts
 
 The official PostgreSQL image requires different container mount targets:
 
@@ -38,11 +36,7 @@ The official PostgreSQL image requires different container mount targets:
 | 17 and below       | `/var/lib/postgresql/data` |
 | 18 and above       | `/var/lib/postgresql`      |
 
-Changing the image major and mount target does not migrate a database. If an
-existing PostgreSQL 17 service was run with the parent `/var/lib/postgresql`
-mount, Docker may have stored the active cluster in an anonymous volume declared
-by the image. Recreating with the corrected bind target can then reveal older
-host files while the newer cluster remains in the detached volume.
+Changing the image major and mount target does not migrate a database. If an existing PostgreSQL 17 service was run with the parent `/var/lib/postgresql` mount, Docker may have stored the active cluster in an anonymous volume declared by the image. Recreating with the corrected bind target can then reveal older host files while the newer cluster remains in the detached volume.
 
 Before changing or recreating that service:
 
@@ -59,13 +53,11 @@ Before changing or recreating that service:
 > successfully. A healthy `pg_isready` response proves only that a database is
 > accepting connections, not that it contains the expected Paperless records.
 
-An empty healthy database is still empty. It is merely empty with excellent
-posture.
+An empty healthy database is still empty. It is merely empty with excellent posture.
 
-## Pay the Paperless-ngx v3 Tollkeeper 🛑
+## Prepare the Paperless-ngx v3 upgrade
 
-The checked-in example currently pins Paperless-ngx `3.5.1`. Upstream requires
-all v3 upgrades to start from `2.20.15`.
+The checked-in example currently pins Paperless-ngx `3.5.1`. Upstream requires all v3 upgrades to start from `2.20.15`.
 
 If the existing instance is older than `2.20.15`:
 
@@ -75,46 +67,33 @@ If the existing instance is older than `2.20.15`:
 4. Make and verify another backup.
 5. Set `PAPERLESS_TAG` to the reviewed v3 version and continue below.
 
-If the instance already attempted to pull v3 but stopped with
-`PAPERLESS_SECRET_KEY is not set`, check the last successfully running version.
-The reported startup failure occurs before v3 migrations, but that alone does
-not prove the previous database version was `2.20.15`.
+If the instance already attempted to pull v3 but stopped with `PAPERLESS_SECRET_KEY is not set`, check the last successfully running version. The reported startup failure occurs before v3 migrations, but that alone does not prove the previous database version was `2.20.15`.
 
-The tollkeeper accepts exactly one currency: evidence. Screaming "but Compose
-pulled it successfully" is not evidence and only encourages him.
+The toll collector accepts exactly one currency: evidence. Screaming "but Compose pulled it successfully" is not evidence and only encourages him.
 
-## Forge the Seal of the Eternal Archive 🔑🔥
+## Preserve the signing key and credentials
 
-Paperless-ngx v3 refuses to start without a unique signing key:
+Paperless-ngx v3 requires a unique signing key of at least 32 characters. Recover an existing installation's `PAPERLESS_SECRET_KEY` from its protected configuration or backup first; keep that value stable. Only generate a key when provisioning a new archive or when the verified upgrade plan establishes that no prior key exists:
 
 ```sh
 python3 -c "import secrets; print(secrets.token_urlsafe(64))"
 ```
 
-Store the output as `PAPERLESS_SECRET_KEY` in `.env`. Never commit it, post it in
-an issue, or rotate it casually.
+Store the output as `PAPERLESS_SECRET_KEY` in `.env`. Never commit it, post it in an issue, or rotate it casually.
 
-> [!WARNING]
-> Replacing an existing signing key invalidates active sessions and other signed
-> tokens. Keep the generated key with the rest of the deployment secrets and
-> include `.env` in the protected backup plan.
+Replacing an existing signing key invalidates active sessions and other signed tokens. Keep the key with the rest of the deployment secrets and include `.env` in the protected backup plan.
 
-Also replace the example Redis, PostgreSQL, and administrator passwords. Keep
-`REDIS_PASSWORD` and the password embedded in `PAPERLESS_REDIS` synchronized. A
-password-only Redis URL uses this form:
+Ensure no example Redis, PostgreSQL, or administrator passwords remain; preserve established credentials unless a coordinated change is intended. Keep `REDIS_PASSWORD` and the password embedded in `PAPERLESS_REDIS` synchronized. A password-only Redis URL uses this form:
 
 ```text
 redis://:<URL-encoded-password>@redis:6379
 ```
 
-Do not laminate the signing key, post it beside the NAS, or tattoo it on the
-intern. Store it in the protected secret and backup system.
+Do not laminate the signing key, post it beside the NAS, or tattoo it on the intern. Store it in the protected secret and backup system.
 
-## Read the New Infernal Bylaws 📜
+## Review Paperless v3 behavior and compatibility
 
-This repository already sets the PostgreSQL engine explicitly and preserves the
-old duplicate-rejection behavior. Review the remaining upstream changes before
-starting v3:
+This repository already sets the PostgreSQL engine explicitly and preserves the old duplicate-rejection behavior. Review the remaining upstream changes before starting v3:
 
 - Duplicate documents are allowed by default upstream. This stack sets
   `PAPERLESS_CONSUMER_DELETE_DUPLICATES=true` to retain the v2 behavior.
@@ -136,48 +115,50 @@ starting v3:
   database migration.
 - Older x86 hardware must meet the new `x86-64-v2` CPU baseline.
 
-Read the complete [official v3 migration guide](https://docs.paperless-ngx.com/migration-v3/)
-for the exact mappings and action items.
+Read the complete [official v3 migration guide](https://docs.paperless-ngx.com/migration-v3/) for the exact mappings and action items.
 
-### Retire the v2 Forms Before They Haunt Payroll 👻📋
+### Replace retired environment settings
 
-`make check-env` rejects the v2 settings below because Paperless-ngx v3 renamed,
-removed, or deprecated them. Update `.env` before attempting the migration:
+`make check-env` rejects the v2 settings below because Paperless-ngx v3 renamed, removed, or deprecated them. Update `.env` before attempting the migration:
 
-| Legacy v2 setting                                                                                                                              | v3 action                                               |
-| ---------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| `PAPERLESS_CONSUMER_POLLING`                                                                                                                   | Use `PAPERLESS_CONSUMER_POLLING_INTERVAL`               |
-| `PAPERLESS_CONSUMER_INOTIFY_DELAY`                                                                                                             | Use `PAPERLESS_CONSUMER_STABILITY_DELAY`                |
-| `PAPERLESS_CONSUMER_POLLING_DELAY`                                                                                                             | Use `PAPERLESS_CONSUMER_STABILITY_DELAY`                |
-| `PAPERLESS_CONSUMER_POLLING_RETRY_COUNT`                                                                                                       | Remove it; v3 tracks file stability automatically       |
-| `PAPERLESS_CONSUMER_BARCODE_SCANNER`                                                                                                           | Remove it; v3 uses `zxing-cpp` exclusively              |
-| `PAPERLESS_DBSSLMODE`, `PAPERLESS_DBSSLROOTCERT`, `PAPERLESS_DBSSLCERT`, `PAPERLESS_DBSSLKEY`, `PAPERLESS_DB_POOLSIZE`, `PAPERLESS_DB_TIMEOUT` | Move the equivalent options into `PAPERLESS_DB_OPTIONS` |
-| `PAPERLESS_OCR_SKIP_ARCHIVE_FILE`                                                                                                              | Use `PAPERLESS_ARCHIVE_FILE_GENERATION`                 |
+| Legacy v2 setting | v3 action |
+| --- | --- |
+| `PAPERLESS_CONSUMER_POLLING` | Use `PAPERLESS_CONSUMER_POLLING_INTERVAL` |
+| `PAPERLESS_CONSUMER_INOTIFY_DELAY` | Use `PAPERLESS_CONSUMER_STABILITY_DELAY` |
+| `PAPERLESS_CONSUMER_POLLING_DELAY` | Use `PAPERLESS_CONSUMER_STABILITY_DELAY` |
+| `PAPERLESS_CONSUMER_POLLING_RETRY_COUNT` | Remove it; v3 tracks file stability automatically |
+| `PAPERLESS_CONSUMER_BARCODE_SCANNER` | Remove it; v3 uses `zxing-cpp` exclusively |
+| `PAPERLESS_OCR_SKIP_ARCHIVE_FILE` | Use `PAPERLESS_ARCHIVE_FILE_GENERATION` |
 
-The example configuration explicitly sets `PAPERLESS_OCR_MODE=auto` and
-`PAPERLESS_ARCHIVE_FILE_GENERATION=auto`. These preserve upstream v3's automatic
-decision-making while making the deployment policy reviewable instead of
-leaving it in an invisible desk drawer.
+Move equivalent database options into `PAPERLESS_DB_OPTIONS` for these retired settings:
 
-> [!IMPORTANT]
-> Do not mechanically rename a retired setting without reading its v3 behavior.
-> The new stability detector, database options mapping, and archive-generation
-> policy are not all one-for-one substitutions. HADES has rejected Form 27-B,
-> "It Had Basically the Same Name," for being how incidents get promoted.
+- `PAPERLESS_DBSSLMODE`
+- `PAPERLESS_DBSSLROOTCERT`
+- `PAPERLESS_DBSSLCERT`
+- `PAPERLESS_DBSSLKEY`
+- `PAPERLESS_DB_POOLSIZE`
+- `PAPERLESS_DB_TIMEOUT`
 
-## Keep the Conversion Clerks Compatible 📄
+The example configuration explicitly sets `PAPERLESS_OCR_MODE=auto` and `PAPERLESS_ARCHIVE_FILE_GENERATION=auto`. These preserve upstream v3's automatic decision-making while making the deployment policy reviewable instead of leaving it in an invisible desk drawer.
+
+Do not mechanically rename a retired setting without reading its v3 behavior. The new stability detector, database options mapping, and archive-generation policy are not all one-for-one substitutions. HADES has rejected Form 27-B, "It Had Basically the Same Name," for being how incidents get promoted.
+
+## Keep document conversion compatible
 
 Use the reviewed Gotenberg `8.40.0` and Apache Tika `3.3.3.1` pins with Paperless-ngx `3.5.1`. Newer major versions are available, but their APIs differ from the clients bundled with this Paperless release. Gotenberg 9 removes the `pdfa` form field used for archival conversion; Tika 4 removes the `/tika/form` endpoint used by the current Tika client. A green healthcheck or Compose validation does not exercise those conversion paths.
 
 Leave the [Gotenberg 9 proposal](https://github.com/scottgigawatt/paperless-ngx/pull/37) as a draft until Paperless and its clients support the new APIs and a disposable Office-to-PDF/A conversion succeeds. Review the [Gotenberg migration guide](https://gotenberg.dev/docs/getting-started/upgrade) and [Paperless Tika 4 compatibility report](https://github.com/paperless-ngx/paperless-ngx/issues/13755) before changing either major version. Keep compatible patch and security updates under review; do not disable archival output to make an incompatible update pass.
 
-## Return the Oracle With a Security Badge 🔮
+<!-- markdownlint-disable-next-line MD033 -->
+<a id="return-the-oracle-with-a-security-badge-"></a>
+
+## Upgrade or recover Paperless-AI
 
 [Paperless-AI `4.0.0`](https://github.com/clusterzx/paperless-ai/releases/tag/v4.0.0) restores maintained support for Paperless-ngx 2.x and 3.x and fixes the unauthenticated setup takeover affecting all earlier versions. Upstream reports active exploitation. Review its [v4 migration and recovery guide](https://github.com/clusterzx/paperless-ai/blob/v4.0.0/README.md#upgrading-from-3x) before changing an existing deployment.
 
 1. Stop the companion and back up its complete `PAPERLESS_AI_CONFIG_PATH` directory separately from the core archive backup.
 2. If an internet-reachable v3 instance has unexpected credentials or endpoints, preserve the old data for investigation and configure v4 with a new empty data directory. Replace its Paperless API token and AI-provider keys and review access logs. Do not migrate suspected compromised settings.
-3. Set `PAPERLESS_AI_TAG=4.0.0` in `.env`. Keep the existing `/app/data` mount for trusted migrations. V4 imports legacy state at first start and retains the old files; its rebuilt search index can download an embedding model.
+3. Set `PAPERLESS_AI_TAG=4.5.1` in `.env` and review the [4.5 data and permission checkpoints](#review-paperless-ai-45-data-and-permissions) before first start. Keep the existing `/app/data` mount for trusted migrations. V4 imports legacy state at first start and retains the old files; its rebuilt search index can download an embedding model.
 4. Remove obsolete `PUID`, `PGID`, and `RAG_SERVICE_URL` companion settings and `RAG_SERVICE_ENABLED` unless an environment override is intentional. The checked-in Compose service now runs with `DEFAULT_UID:DEFAULT_GID`; ensure that identity can write the companion data directory. Its healthcheck uses Node, which is included in v4.
 5. Start only the companion after the core archive is healthy. Confirm migration messages, sign in with the existing account, review settings, and test with a non-sensitive document. Complete initial setup behind restricted access.
 
@@ -201,7 +182,7 @@ At first start, automatic migrations move the search index into `data/index.db` 
 
 After migration, verify the companion can reach the internal Paperless API, sign in, and process a non-sensitive test document. Review the [pinned 4.5 upgrade instructions](https://github.com/clusterzx/paperless-ai/blob/v4.5.1/docs/guide/upgrading.md#to-45) before accepting the update. Retain the verified backup; changing image tags back does not undo schema or metadata changes.
 
-## Raise the New Stack Carefully ⚡
+## Start and verify the upgraded stack
 
 After the backup, prerequisite version, secret, and settings are confirmed:
 
@@ -221,12 +202,6 @@ Confirm all of the following before considering the upgrade complete:
 - Existing documents, previews, search, consumption, and export work.
 - Paperless-AI can still reach the Paperless API and process a safe test document.
 
-If Paperless-AI fails against v3, stop that companion while keeping the core
-Paperless, PostgreSQL, Redis, Tika, and Gotenberg services running. Do not treat
-an optional integration as a reason to roll a healthy core archive
-back without first separating the failures.
+If Paperless-AI fails against v3, stop that companion while keeping the core Paperless, PostgreSQL, Redis, Tika, and Gotenberg services running. Do not treat an optional integration as a reason to roll a healthy core archive back without first separating the failures.
 
-Keep the pre-upgrade backup until normal operation has been verified for several
-days. A green healthcheck is delightful; a tested restore is better. The former
-is a light on a dashboard. The latter is how you avoid explaining data loss to
-the Four Horsemen of Compliance. 🗃️🔥
+Keep the pre-upgrade backup until normal operation has been verified for several days. A green healthcheck is delightful; a tested restore is better. The former is a light on a dashboard. The latter is how you avoid explaining data loss to the Four Horsemen of Compliance. 🗃️🔥

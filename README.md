@@ -1,5 +1,3 @@
-<!-- markdownlint-disable MD033 MD041 -->
-
 <!--
   Copyright 2025-2026 Scott Gigawatt
 
@@ -8,6 +6,11 @@
   README.md: Operate the HADES Paperless-ngx document archive.
   -->
 
+# HADES Paperless-ngx 🗃️🔥
+
+**HADES: Highly Automated Document Extraction & Storage** turns receipts, statements, and other paperwork into a searchable archive on a Docker Compose host or Synology NAS. This repository supplies one deployment file for six published service images. Nobody escapes the paperwork—not even the paperwork.
+
+<!-- markdownlint-disable MD033 -->
 <hr />
 
 <p align="center">
@@ -15,18 +18,22 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/github/license/scottgigawatt/paperless-ngx?label=Archive%20License&color=blue" alt="License" />
-  <img src="https://img.shields.io/github/last-commit/scottgigawatt/paperless-ngx?label=Last%20Scan&logo=git&color=green" alt="Last Commit" />
-  <img src="https://img.shields.io/github/repo-size/scottgigawatt/paperless-ngx?label=Filing%20Cabinet&color=orange" alt="Repo Size" />
+  <a href="https://github.com/scottgigawatt/paperless-ngx/stargazers"><img src="https://img.shields.io/github/stars/scottgigawatt/paperless-ngx?style=social&amp;label=Stars&amp;logo=github&amp;logoColor=181717" alt="Repository stars" /></a>
+  <a href="https://github.com/scottgigawatt/paperless-ngx/forks"><img src="https://img.shields.io/github/forks/scottgigawatt/paperless-ngx?style=social&amp;label=Forks&amp;logo=github&amp;logoColor=181717" alt="Repository forks" /></a>
+  <a href="https://github.com/scottgigawatt/paperless-ngx/watchers"><img src="https://img.shields.io/github/watchers/scottgigawatt/paperless-ngx?style=social&amp;label=Watchers&amp;logo=github&amp;logoColor=181717" alt="Repository watchers" /></a>
+  <a href="https://github.com/scottgigawatt/paperless-ngx/releases/latest"><img src="https://img.shields.io/github/v/release/scottgigawatt/paperless-ngx?style=social&amp;label=Release&amp;logo=github&amp;logoColor=181717" alt="Latest repository release" /></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/scottgigawatt/paperless-ngx/actions/workflows/validate-pr.yml">
-    <img src="https://github.com/scottgigawatt/paperless-ngx/actions/workflows/validate-pr.yml/badge.svg" alt="Compose validation" />
-  </a>
-  <a href="https://securityscorecards.dev/viewer/?uri=github.com/scottgigawatt/paperless-ngx">
-    <img src="https://api.securityscorecards.dev/projects/github.com/scottgigawatt/paperless-ngx/badge" alt="OpenSSF Scorecard" />
-  </a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/scottgigawatt/paperless-ngx?label=Archive%20License&amp;style=flat&amp;logo=apache&amp;logoColor=white&amp;color=D7263D&amp;labelColor=D7263D" alt="Apache 2.0 license" /></a>
+  <a href="https://github.com/scottgigawatt/paperless-ngx/commits/main"><img src="https://img.shields.io/github/last-commit/scottgigawatt/paperless-ngx?label=Last%20Scan&amp;style=flat&amp;logo=git&amp;logoColor=white&amp;color=C45100&amp;labelColor=C45100" alt="Latest commit" /></a>
+  <a href="https://github.com/scottgigawatt/paperless-ngx"><img src="https://img.shields.io/github/repo-size/scottgigawatt/paperless-ngx?label=Filing%20Cabinet&amp;style=flat&amp;logo=github&amp;logoColor=white&amp;color=8C6900&amp;labelColor=8C6900" alt="Repository size" /></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/scottgigawatt/paperless-ngx/actions/workflows/validate-pr.yml"><img src="https://img.shields.io/github/actions/workflow/status/scottgigawatt/paperless-ngx/validate-pr.yml?event=pull_request&amp;label=Validation&amp;style=flat&amp;logo=githubactions&amp;logoColor=white&amp;color=16823B&amp;labelColor=16823B" alt="Compose validation workflow status" /></a>
+  <a href="https://securityscorecards.dev/viewer/?uri=github.com/scottgigawatt/paperless-ngx"><img src="https://img.shields.io/ossf-scorecard/github.com/scottgigawatt/paperless-ngx?label=OpenSSF%20Scorecard&amp;style=flat&amp;logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAxIDIgNXY2YzAgNiA0LjMgMTAuMiAxMCAxMiA1LjctMS44IDEwLTYgMTAtMTJWNXptMCAzIDcgM3Y0YzAgNC4zLTIuOSA3LjctNyA5LjRDNy45IDE4LjcgNSAxNS4zIDUgMTFWN3oiLz48L3N2Zz4%3D&amp;logoColor=white&amp;color=007D9C&amp;labelColor=007D9C" alt="OpenSSF Scorecard score" /></a>
+  <a href="docs/SECURITY.md"><img src="https://img.shields.io/badge/Security-View%20policy-5138B6?label=Security&amp;style=flat&amp;logo=github&amp;logoColor=white&amp;color=5138B6&amp;labelColor=5138B6" alt="Security policy and private reporting" /></a>
 </p>
 
 <p align="center">─── ⛧ ───</p>
@@ -36,271 +43,72 @@
 </p>
 
 <p align="center">
-  <a href="https://discord.gg/BpEGzWwGYf">
-    <img src="https://img.shields.io/discord/1403601106315116626?label=%F0%9F%94%A5HADES%F0%9F%94%A5&logo=discord&logoColor=white&color=5865F2" alt="🔥HADES🔥 Discord" />
-  </a>
+  <a href="https://discord.gg/BpEGzWwGYf"><img src="https://img.shields.io/discord/1403601106315116626?label=%F0%9F%94%A5HADES%F0%9F%94%A5&amp;style=flat&amp;logo=discord&amp;logoColor=white&amp;color=C42878&amp;labelColor=C42878" alt="HADES Discord community" /></a>
 </p>
 
 <hr />
+<!-- markdownlint-enable MD033 -->
 
-# HADES Paperless-ngx 🗃️🔥
+## Start here 🧭
 
-Welcome to **HADES: Highly Automated Document Extraction & Storage**, the
-underworld's premier bureaucracy for turning receipts, statements, manuals, and
-other mortal paper clutter into a searchable digital archive. Nobody escapes
-the paperwork—not even the paperwork.
+- **New archive:** [install and configure HADES](docs/setup.md#before-you-start), then follow the quickstart below.
+- **Existing archive:** [read the upgrade procedure](docs/UPGRADING.md) before pulling images. Paperless v3 requires an upgrade through `2.20.15`; PostgreSQL major changes require a database migration. Paperless-AI before `4.0.0` has an actively exploited setup vulnerability: follow its [upgrade and recovery procedure](docs/UPGRADING.md#upgrade-or-recover-paperless-ai).
+- **Running archive:** [back up, operate, and troubleshoot](docs/operations.md).
+- **Contributors:** [prepare tools and validate changes](docs/CONTRIBUTING.md).
 
-The Department operates on a Synology NAS or any Docker Compose host and
-provides one complete deployment file for Paperless-ngx, Paperless-AI,
-PostgreSQL, Redis, Gotenberg, and Apache Tika. Six containers enter. One tidy
-archive leaves. Legal insists we clarify that the containers also leave.
+## Create a new archive 🚀
 
-It remains inspired by the Synology guides from
-[Marius Hosting](https://mariushosting.com/) while adding repeatable validation,
-version management, safer upgrades, and repository governance.
+You need Git, a running Docker installation with Compose, private writable storage, and Python 3 to generate a signing key. Make is optional. Check [host requirements, storage permissions, and required settings](docs/setup.md#before-you-start) first. This route downloads deployment files and runs published images; it does not build applications locally.
 
-## Meet the Infernal Civil Service 📂💀
+1. Get the deployment files and create a private settings file:
 
-| Service | Infernal job title | Actual responsibility | Default image version |
-| --- | --- | --- | --- |
-| Paperless-ngx | Supreme Archivist | Document archive, OCR, search, workflows, and API | `3.4.2` |
-| Paperless-AI | Oracle with a security badge | Optional document analysis, tagging, and archive chat | `4.0.0` |
-| PostgreSQL | Keeper of the Eternal Ledger | Paperless application database | `18.7` |
-| Redis | Pneumatic-Tube Imp | Broker for background and scheduled work | `8.10.3` |
-| Gotenberg | PDF Forge Master | Office and email conversion to PDF | `8.40.0` |
-| Apache Tika | Translator of Cursed Documents | Office document text and metadata extraction | `3.3.3.0` |
+   ```sh
+   git clone https://github.com/scottgigawatt/paperless-ngx.git
+   cd paperless-ngx
+   cp example.env .env
+   python3 -c "import secrets; print(secrets.token_urlsafe(64))"
+   ```
 
-All image versions are configurable in `.env`. The example pins reviewed
-versions instead of floating `latest`, and Renovate proposes future updates as
-reviewable pull requests.
+2. Save the generated value as `PAPERLESS_SECRET_KEY` in `.env`. Replace every `change-me` value, synchronize the Redis password and URL, retain the internal `paperless-ngx` allowed host, and configure the [host paths, identity, web address, and network](docs/setup.md#configure-the-required-values). Create the configured host directories with appropriate write permissions. Keep `.env` private and include it in protected backups. Preserve an existing archive's original key.
+3. Validate without displaying secrets, then pull and start all six services. The commands are chained so a failed check or pull prevents startup:
 
-> [!NOTE]
-> Paperless-ngx v3 includes its own optional AI features. The separate
-> Paperless-AI service remains in this stack for users who intentionally use its
-> workflow and interface; it is not required for core Paperless operation. The
-> Oracle may therefore be dismissed without collapsing the Department.
+   ```sh
+   sh test/check-env.sh .env &&
+   sh test/check-compose-env.sh docker-compose.yml example.env &&
+   docker compose --env-file .env -f docker-compose.yml config --quiet &&
+   docker compose --env-file .env -f docker-compose.yml pull &&
+   docker compose --env-file .env -f docker-compose.yml up --detach --remove-orphans &&
+   docker compose --env-file .env -f docker-compose.yml ps &&
+   docker compose --env-file .env -f docker-compose.yml logs --follow paperless-ngx
+   ```
 
-> [!WARNING]
-> Paperless-AI versions before `4.0.0` allow unauthenticated setup changes, and upstream reports active exploitation. The example now pins the fixed v4 release. Follow the [Paperless-AI upgrade and recovery steps](docs/UPGRADING.md#return-the-oracle-with-a-security-badge-) before migrating an existing instance.
+   Wait for database migrations and Paperless initialization to finish. Use **Ctrl+C** to stop following logs; the services keep running. With Make installed, `make config`, `make pull`, `make up`, `make ps`, and `make logs` provide the equivalent checks and lifecycle actions. Do not run bare `make`: its default target starts the stack.
+4. Open your configured `PAPERLESS_URL`. On a trusted LAN without a reverse proxy, use `http://<host-address>:8777` after setting the URL and CSRF origin accordingly. Sign in with `PAPERLESS_ADMIN_USER` and the private `PAPERLESS_ADMIN_PASSWORD` selected for this new installation.
+5. [File and search a test document](docs/setup.md#file-your-first-searchable-document). Confirm its preview, searchable text, and original download before adding private records.
 
-## Mandatory Ritual Pause Before v3 🛑🕯️
+Paperless-AI starts with the stack but is optional for core archiving. Keep its initial setup private and [configure or stop the companion](docs/setup.md#configure-the-optional-paperless-ai-companion) after the core archive works. The Oracle is on payroll; that does not grant it access to your filing cabinet.
 
-Paperless-ngx v3 requires `PAPERLESS_SECRET_KEY` and can only migrate from
-version `2.20.15`. This is a migration gate, not a suggestion whispered by a
-ghost in Compliance.
+## Meet the infernal civil service 📂
 
-> [!CAUTION]
-> If this is an existing installation, do not simply pull the v3 image. Read
-> [Upgrading Paperless-ngx](docs/UPGRADING.md), verify the last successful
-> version, complete the `2.20.15` prerequisite when needed, and test a full
-> backup before starting migrations.
+| Service | Responsibility |
+| --- | --- |
+| Paperless-ngx | Archive, OCR, search, workflows, and API |
+| Paperless-AI | Optional document analysis, tagging, and archive chat |
+| PostgreSQL | Application database: the Eternal Ledger |
+| Redis | Background-task broker: the pneumatic tubes |
+| Gotenberg | Office and email conversion to PDF |
+| Apache Tika | Office document text and metadata extraction |
 
-> [!CAUTION]
-> PostgreSQL 17 and below must mount `/var/lib/postgresql/data`; PostgreSQL 18+
-> must mount `/var/lib/postgresql`. If this project previously ran PostgreSQL 17
-> with the newer parent mount, inspect Docker's active volumes and make a logical
-> database backup before any Compose recreate. Changing the mount can hide the
-> current cluster and reveal older files that merely look like the same database.
+[`example.env`](example.env) owns the complete settings and reviewed image pins. `.env` holds your private overrides. Renovate proposes updates for review; Watchtower is disabled so application, database, broker, and companion upgrades remain coordinated.
 
-The v3 upgrade also changes duplicate handling, consumer settings, OCR/archive
-options, advanced database options, search indexing, task history, consume
-scripts, and some reverse-proxy behavior. The repository preserves the old
-duplicate-rejection behavior with
-`PAPERLESS_CONSUMER_DELETE_DUPLICATES=true`; the other changes require review
-against the private deployment.
+## Read more and get help 📚
 
-## Open a New Branch Office 🚀🏛️
+- [Setup](docs/setup.md): host prerequisites, settings, Synology Container Manager, Portainer, and first document.
+- [Operations and troubleshooting](docs/operations.md): storage, backups, lifecycle commands, and recovery routes.
+- [Upgrade guide](docs/UPGRADING.md): prerequisite versions, database migration boundaries, conversion compatibility, and companion security.
+- [Security policy](docs/SECURITY.md): protect documents and report vulnerabilities privately.
+- [Contributing](docs/CONTRIBUTING.md): checks, repository conventions, and pull requests.
+- [Paperless-ngx configuration](https://docs.paperless-ngx.com/configuration/) and [administration](https://docs.paperless-ngx.com/administration/): upstream settings and application management.
+- [Paperless-AI documentation](https://clusterzx.github.io/paperless-ai/): companion configuration and providers.
 
-### 1. Complete the Entrance Forms 🖋️
-
-```sh
-cp example.env .env
-python3 -c "import secrets; print(secrets.token_urlsafe(64))"
-```
-
-Edit `.env` and:
-
-- store the generated output as `PAPERLESS_SECRET_KEY`;
-- replace every value beginning with `change-me`;
-- keep the Redis password and the password inside `PAPERLESS_REDIS` identical;
-- align `POSTGRES_DATA_TARGET` with the selected PostgreSQL major version;
-- set the Synology host paths, UID, GID, timezone, URL, and network range;
-- URL-encode special characters used inside `PAPERLESS_REDIS`.
-
-Yes, HADES requires paperwork before it can eliminate paperwork. This is called
-institutional continuity.
-
-> [!IMPORTANT]
-> Keep `PAPERLESS_SECRET_KEY` stable and backed up. Rotating it invalidates
-> active sessions and other signed tokens.
-
-Validate the private settings without printing them:
-
-```sh
-make check-env
-make config
-```
-
-### 2. Recite the Approved Incantations 🔥
-
-```sh
-make pull
-make up
-make ps
-```
-
-Follow the first startup until database migrations and the Paperless healthcheck
-finish:
-
-```sh
-make logs
-```
-
-### 3. Establish a Synology Annex 🏢
-
-1. Place `docker-compose.yml`, `.env`, and the checked-in `config/` directory in
-   the project folder on the NAS.
-2. Open **Container Manager → Project → Create**.
-3. Choose the project path and import `docker-compose.yml`.
-4. Review the rendered services, ports, volumes, and private subnet.
-5. Build the project and inspect the Paperless logs before logging in.
-
-The same root `docker-compose.yml` is also suitable for a Portainer stack. No
-overlay files or generated Compose fragments are required.
-
-## Forms Required by the Ministry 🧭📜
-
-The root [`example.env`](example.env) is the complete settings reference for this
-deployment. The most important groups are:
-
-- private Docker network and Synology firewall range;
-- container identity, timezone, and log rotation;
-- pinned service image versions;
-- Redis, PostgreSQL, administrator, and Paperless signing secrets;
-- reverse-proxy URL and CSRF origin;
-- OCR, duplicate, task-worker, and Office parsing behavior;
-- persistent host paths and published web ports.
-
-Paperless-ngx listens on `${PAPERLESS_WEBUI_PORT}` and Paperless-AI listens on
-`${PAPERLESS_AI_WEBUI_PORT}`. Put internet-facing access behind a properly
-configured TLS reverse proxy; do not expose internal Redis, PostgreSQL, Tika, or
-Gotenberg ports.
-
-### Draw the Network Pentagram Carefully 🛜
-
-The example reserves:
-
-```text
-Subnet:  172.24.0.0/16
-Range:   172.24.5.0/24
-Gateway: 172.24.5.254
-```
-
-Choose an unused private subnet that does not overlap the NAS, VPN, LAN, or
-another Docker network. If the Synology firewall filters Docker bridge traffic,
-allow only the selected subnet and necessary published web ports.
-
-Overlapping subnets are how two departments accidentally summon the same
-printer. Nobody wants another incident report from Accounting.
-
-## Approved Incantations 🛠️✨
-
-```text
-make help             Show supported commands
-make check-env        Reject missing and placeholder private settings
-make config           Validate docker-compose.yml with .env
-make config-example   Validate the checked-in example with CI-only secrets
-make validate         Run repository-owned configuration checks
-make pull             Pull configured image versions
-make up               Start or update the stack
-make down             Stop the stack without deleting application data
-make restart          Recreate the stack
-make ps               Show service health and status
-make logs             Follow logs from the stack
-```
-
-`make down` deliberately avoids `--volumes`. This project does not provide a
-one-command nuke target for irreplaceable documents and database state. HADES
-has standards, a retention policy, and a shredder that requires three managers
-to turn three separate keys. 🔥
-
-## Where the Bodies—Sorry, Files—Are Buried 💾⚰️
-
-The checked-in directories retain only `.gitignore` files. Live data belongs in
-the host paths configured by `.env`:
-
-```text
-config/
-├── paperless-ai/
-└── paperless-ngx/
-    ├── consume/
-    ├── data/
-    ├── db/
-    ├── export/
-    ├── media/
-    ├── redis/
-    └── trash/
-```
-
-Back up PostgreSQL, Paperless `data`, `media`, and `export`, Paperless-AI data,
-and `.env`. Test restoration away from the live paths before relying on the
-backup. PostgreSQL major-version upgrades require their own reviewed migration;
-changing `POSTGRES_TAG` is not a database upgrade plan.
-
-If your backup has never been restored, it is not a backup; it is an optimistic
-collection of bytes wearing a tiny safety vest.
-
-## Complaints Window and Exorcism Desk 🔎🧯
-
-### `PAPERLESS_SECRET_KEY is not set`
-
-Paperless-ngx v3 refuses to start without a unique signing key. Generate it,
-store it in `.env`, then recreate the service:
-
-```sh
-python3 -c "import secrets; print(secrets.token_urlsafe(64))"
-make check-env
-make up
-```
-
-Do not paste the generated value into an issue or log.
-
-### The Pneumatic-Tube Imp Is Missing
-
-- Confirm Redis is healthy with `make ps`.
-- Keep `REDIS_PASSWORD` and the password in `PAPERLESS_REDIS` synchronized.
-- Use `redis://:<URL-encoded-password>@redis:6379` for password-only auth.
-- Confirm the custom subnet does not overlap another network.
-
-### The Supreme Archivist Is Unwell After an Upgrade
-
-- Check that the prior v2 release was exactly `2.20.15` before v3 migration.
-- Review the explicit OCR and archive-generation policies and remove settings
-  retired or renamed by v3; `make check-env` identifies known obsolete keys.
-- Inspect migration and index-rebuild output with `make logs`.
-- Review the [official v3 migration guide](https://docs.paperless-ngx.com/migration-v3/).
-- Restore the verified pre-upgrade backup if the documented rollback boundary is
-  reached; do not repeatedly restart a failing migration and hope it becomes
-  paperwork jazz.
-
-### Cerberus Returns `403` at the Archive Gate
-
-Confirm `PAPERLESS_URL` and `PAPERLESS_CSRF_TRUSTED_ORIGINS`. Paperless v3 may
-also require trusted-proxy settings for login rate limiting; follow the upstream
-configuration guide for the actual proxy hop count and forwarded client-IP
-header.
-
-## Infernal Employee Handbook 📚🔥
-
-- [Upgrading Paperless-ngx](docs/UPGRADING.md)
-- [Contributing](docs/CONTRIBUTING.md)
-- [Security policy](docs/SECURITY.md)
-- [Paperless-ngx configuration](https://docs.paperless-ngx.com/configuration/)
-- [Paperless-ngx administration](https://docs.paperless-ngx.com/administration/)
-- [Paperless-AI documentation](https://clusterzx.github.io/paperless-ai/)
-- [Marius Hosting Paperless-ngx guide](https://mariushosting.com/synology-install-paperless-ngx-with-office-files-support/)
-- [Marius Hosting Paperless-AI guide](https://mariushosting.com/how-to-install-paperless-ai-on-your-synology-nas/)
-
-Bring order to the Eternal Archive, keep secrets behind Cerberus, and may every
-OCR job find its correspondent before the quarterly performance review. HADES:
-because death is temporary, but records retention is forever. 🗃️🔥💀
+HADES remains inspired by [Marius Hosting](https://mariushosting.com/) and its [Paperless-ngx](https://mariushosting.com/synology-install-paperless-ngx-with-office-files-support/) and [Paperless-AI](https://mariushosting.com/how-to-install-paperless-ai-on-your-synology-nas/) guides, with repeatable validation, reviewed versions, and upgrade safeguards. Death is temporary; records retention is forever. 🗃️🔥

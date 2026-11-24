@@ -202,6 +202,7 @@ services:
       USERMAP_GID: ${DEFAULT_GID}                                        # Map Paperless files to the host group
       PAPERLESS_TIME_ZONE: ${TZ}                                         # Set the Paperless application timezone
       PAPERLESS_URL: ${PAPERLESS_URL}                                    # Define the canonical public URL
+      PAPERLESS_ALLOWED_HOSTS: ${PAPERLESS_ALLOWED_HOSTS}                # Allow the companion service hostname and chosen direct-access hosts
       PAPERLESS_CSRF_TRUSTED_ORIGINS: ${PAPERLESS_CSRF_TRUSTED_ORIGINS}  # Trust the configured reverse proxy origin
       PAPERLESS_SECRET_KEY: ${PAPERLESS_SECRET_KEY}                      # Required stable key for signatures and sessions
 

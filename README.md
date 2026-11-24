@@ -31,7 +31,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/scottgigawatt/paperless-ngx/actions/workflows/validate-pr.yml"><img src="https://img.shields.io/github/actions/workflow/status/scottgigawatt/paperless-ngx/validate-pr.yml?label=Validation&amp;style=flat&amp;logo=githubactions&amp;logoColor=white&amp;color=16823B&amp;labelColor=16823B" alt="Compose validation workflow status" /></a>
+  <a href="https://github.com/scottgigawatt/paperless-ngx/actions/workflows/validate-pr.yml"><img src="https://img.shields.io/github/actions/workflow/status/scottgigawatt/paperless-ngx/validate-pr.yml?event=pull_request&amp;label=Validation&amp;style=flat&amp;logo=githubactions&amp;logoColor=white&amp;color=16823B&amp;labelColor=16823B" alt="Compose validation workflow status" /></a>
   <a href="https://securityscorecards.dev/viewer/?uri=github.com/scottgigawatt/paperless-ngx"><img src="https://img.shields.io/ossf-scorecard/github.com/scottgigawatt/paperless-ngx?label=OpenSSF%20Scorecard&amp;style=flat&amp;logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAxIDIgNXY2YzAgNiA0LjMgMTAuMiAxMCAxMiA1LjctMS44IDEwLTYgMTAtMTJWNXptMCAzIDcgM3Y0YzAgNC4zLTIuOSA3LjctNyA5LjRDNy45IDE4LjcgNSAxNS4zIDUgMTFWN3oiLz48L3N2Zz4%3D&amp;logoColor=white&amp;color=007D9C&amp;labelColor=007D9C" alt="OpenSSF Scorecard score" /></a>
   <a href="docs/SECURITY.md"><img src="https://img.shields.io/badge/Security-View%20policy-5138B6?label=Security&amp;style=flat&amp;logo=github&amp;logoColor=white&amp;color=5138B6&amp;labelColor=5138B6" alt="Security policy and private reporting" /></a>
 </p>
@@ -69,7 +69,7 @@ You need Git, a running Docker installation with Compose, private writable stora
    python3 -c "import secrets; print(secrets.token_urlsafe(64))"
    ```
 
-2. Save the generated value as `PAPERLESS_SECRET_KEY` in `.env`. Replace every `change-me` value, synchronize the Redis password and URL, and configure the [host paths, identity, web address, and network](docs/setup.md#configure-the-required-values). Create the configured host directories with appropriate write permissions. Keep `.env` private and include it in protected backups. Preserve an existing archive's original key.
+2. Save the generated value as `PAPERLESS_SECRET_KEY` in `.env`. Replace every `change-me` value, synchronize the Redis password and URL, retain the internal `paperless-ngx` allowed host, and configure the [host paths, identity, web address, and network](docs/setup.md#configure-the-required-values). Create the configured host directories with appropriate write permissions. Keep `.env` private and include it in protected backups. Preserve an existing archive's original key.
 3. Validate without displaying secrets, then pull and start all six services. The commands are chained so a failed check or pull prevents startup:
 
    ```sh

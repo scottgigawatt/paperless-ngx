@@ -33,8 +33,8 @@ PostgreSQL holds the application database; Paperless `media` holds document file
 
 Before application or database upgrades, protect PostgreSQL, Paperless `data`, `media`, and `export`, the complete Paperless-AI data directory, and `.env` with its original signing key. Protect backup access as carefully as live documents; storage volumes contain clear-text records. Preserve pending consumption and retained trash if they are part of your recovery requirements.
 
-1. Follow the [Paperless backup and export guidance](https://github.com/paperless-ngx/paperless-ngx/blob/v3.4.2/docs/administration.md#making-backups) and the [PostgreSQL backup documentation](https://www.postgresql.org/docs/current/backup.html). Create a consistent database backup coordinated with document storage. Copying live database files casually is not a logical database backup.
-2. Keep a separate protected copy of the full companion data directory and required provider credentials. A Paperless document export does not include all stack services or deployment secrets, and API tokens are excluded. Follow the [versioned backup and import guidance](https://github.com/paperless-ngx/paperless-ngx/blob/v3.4.2/docs/administration.md#making-backups) and restore exports into the same Paperless version before upgrading.
+1. Follow the [Paperless backup and export guidance](https://github.com/paperless-ngx/paperless-ngx/blob/v3.5.1/docs/administration.md#making-backups) and the [PostgreSQL backup documentation](https://www.postgresql.org/docs/current/backup.html). Create a consistent database backup coordinated with document storage. Copying live database files casually is not a logical database backup.
+2. Keep a separate protected copy of the full companion data directory and required provider credentials. A Paperless document export does not include all stack services or deployment secrets, and API tokens are excluded. Follow the [versioned backup and import guidance](https://github.com/paperless-ngx/paperless-ngx/blob/v3.5.1/docs/administration.md#making-backups) and restore exports into the same Paperless version before upgrading.
 3. Record the image versions and storage mapping needed to restore. Preserve the original `.env`; never publish it with a support request.
 4. Restore into isolated paths and a separate, compatible test database. Confirm login, document counts, sample originals/previews, and search before trusting the backup. Do not test restoration over the live archive.
 
@@ -83,6 +83,12 @@ For a genuinely new installation, generate the key with the [setup procedure](se
 Confirm the prior v2 release was exactly `2.20.15` before migrating to v3. Review obsolete settings reported by `make check-env`, then inspect migrations and index-rebuild output. Follow the [current upgrade requirements and verification](UPGRADING.md) and [official v3 migration guide](https://docs.paperless-ngx.com/migration-v3/).
 
 Do not repeatedly recreate a failing migration or downgrade an already migrated database without a supported recovery plan. Restore the verified pre-upgrade backup when the documented rollback boundary is reached. A healthy empty PostgreSQL instance is not evidence that the original archive survived.
+
+### Paperless rejects a host or the companion cannot connect
+
+If Paperless returns HTTP 400 with `DisallowedHost`, check `PAPERLESS_ALLOWED_HOSTS`. Retain `paperless-ngx` for the companion's internal API connection; Paperless also accepts `localhost` and adds the canonical hostname from `PAPERLESS_URL` automatically. Append any different NAS hostname or IP used for direct access to the comma-separated list, without a scheme or port. Do not use `*`. A healthy localhost check does not verify the companion's hostname.
+
+After reviewing the [3.5 host-access requirements](UPGRADING.md#review-paperless-35-host-access), run `make check-env` and `make config` before recreating affected services. If the companion still cannot connect, inspect redacted logs and confirm its internal API URL, dedicated user permissions, and private API token. Keep the core archive running while investigating the optional integration.
 
 ### Login returns 403 or a proxy error
 

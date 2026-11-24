@@ -64,7 +64,7 @@ posture.
 
 ## Pay the Paperless-ngx v3 Tollkeeper 🛑
 
-The checked-in example currently pins Paperless-ngx `3.4.2`. Upstream requires
+The checked-in example currently pins Paperless-ngx `3.5.1`. Upstream requires
 all v3 upgrades to start from `2.20.15`.
 
 If the existing instance is older than `2.20.15`:
@@ -167,7 +167,7 @@ leaving it in an invisible desk drawer.
 
 ## Keep the Conversion Clerks Compatible 📄
 
-Use the reviewed Gotenberg `8.40.0` and Apache Tika `3.3.3.0` pins with Paperless-ngx `3.4.2`. Newer major versions are available, but their APIs differ from the clients bundled with this Paperless release. Gotenberg 9 removes the `pdfa` form field used for archival conversion; Tika 4 removes the `/tika/form` endpoint used by the current Tika client. A green healthcheck or Compose validation does not exercise those conversion paths.
+Use the reviewed Gotenberg `8.40.0` and Apache Tika `3.3.3.1` pins with Paperless-ngx `3.5.1`. Newer major versions are available, but their APIs differ from the clients bundled with this Paperless release. Gotenberg 9 removes the `pdfa` form field used for archival conversion; Tika 4 removes the `/tika/form` endpoint used by the current Tika client. A green healthcheck or Compose validation does not exercise those conversion paths.
 
 Leave the [Gotenberg 9 proposal](https://github.com/scottgigawatt/paperless-ngx/pull/37) as a draft until Paperless and its clients support the new APIs and a disposable Office-to-PDF/A conversion succeeds. Review the [Gotenberg migration guide](https://gotenberg.dev/docs/getting-started/upgrade) and [Paperless Tika 4 compatibility report](https://github.com/paperless-ngx/paperless-ngx/issues/13755) before changing either major version. Keep compatible patch and security updates under review; do not disable archival output to make an incompatible update pass.
 
@@ -184,6 +184,22 @@ Leave the [Gotenberg 9 proposal](https://github.com/scottgigawatt/paperless-ngx/
 Configuration rollback does not undo document metadata already changed by the companion. The retained v3 files also omit changes made in v4; keep the verified backup until the migration is accepted.
 
 The Oracle has returned from administrative leave. Security has confiscated its master key.
+
+## Review Paperless 3.5 host access
+
+Paperless 3.5 restricts accepted HTTP hostnames when `PAPERLESS_URL` is set. Before starting the updated image, add `PAPERLESS_ALLOWED_HOSTS=paperless-ngx` to the existing `.env`. This permits the companion's internal `http://paperless-ngx:8000` API connection. Paperless also permits `localhost` and adds the canonical hostname from `PAPERLESS_URL` automatically.
+
+If you also use a NAS hostname or IP address directly, append that hostname or IP to the comma-separated list without a scheme or port. Keep the internal `paperless-ngx` name; do not use `*`. Keep full trusted origins, including their schemes, in `PAPERLESS_CSRF_TRUSTED_ORIGINS`. Run `make check-env` and `make config` before starting services. A passing localhost healthcheck does not prove the companion's hostname is accepted.
+
+See the [Paperless 3.5 release notes](https://github.com/paperless-ngx/paperless-ngx/releases/tag/v3.5.0) and [allowed-host configuration](https://docs.paperless-ngx.com/configuration/#PAPERLESS_ALLOWED_HOSTS).
+
+## Review Paperless-AI 4.5 data and permissions
+
+The reviewed companion update is `4.5.1`. Existing deployments remain in companion mode; the new standalone archive is opt-in. Keep the complete AI data-directory backup and earlier compromise-recovery precautions before starting it.
+
+At first start, automatic migrations move the search index into `data/index.db` and keep a backup under `data/backups/`. Allow extra startup time for a large archive. Existing accounts become administrators; review account roles and API-key permissions, including administration, document deletion, and label management. Watch folders must be outside the AI data and file-storage directories.
+
+After migration, verify the companion can reach the internal Paperless API, sign in, and process a non-sensitive test document. Review the [pinned 4.5 upgrade instructions](https://github.com/clusterzx/paperless-ai/blob/v4.5.1/docs/guide/upgrading.md#to-45) before accepting the update. Retain the verified backup; changing image tags back does not undo schema or metadata changes.
 
 ## Raise the New Stack Carefully ⚡
 

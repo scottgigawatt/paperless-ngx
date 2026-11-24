@@ -185,6 +185,22 @@ Configuration rollback does not undo document metadata already changed by the co
 
 The Oracle has returned from administrative leave. Security has confiscated its master key.
 
+## Review Paperless 3.5 host access
+
+Paperless 3.5 restricts accepted HTTP hostnames when `PAPERLESS_URL` is set. Before starting the updated image, add `PAPERLESS_ALLOWED_HOSTS=paperless-ngx` to the existing `.env`. This permits the companion's internal `http://paperless-ngx:8000` API connection. Paperless also permits `localhost` and adds the canonical hostname from `PAPERLESS_URL` automatically.
+
+If you also use a NAS hostname or IP address directly, append that hostname or IP to the comma-separated list without a scheme or port. Keep the internal `paperless-ngx` name; do not use `*`. Keep full trusted origins, including their schemes, in `PAPERLESS_CSRF_TRUSTED_ORIGINS`. Run `make check-env` and `make config` before starting services. A passing localhost healthcheck does not prove the companion's hostname is accepted.
+
+See the [Paperless 3.5 release notes](https://github.com/paperless-ngx/paperless-ngx/releases/tag/v3.5.0) and [allowed-host configuration](https://docs.paperless-ngx.com/configuration/#PAPERLESS_ALLOWED_HOSTS).
+
+## Review Paperless-AI 4.5 data and permissions
+
+The reviewed companion update is `4.5.1`. Existing deployments remain in companion mode; the new standalone archive is opt-in. Keep the complete AI data-directory backup and earlier compromise-recovery precautions before starting it.
+
+At first start, automatic migrations move the search index into `data/index.db` and keep a backup under `data/backups/`. Allow extra startup time for a large archive. Existing accounts become administrators; review account roles and API-key permissions, including administration, document deletion, and label management. Watch folders must be outside the AI data and file-storage directories.
+
+After migration, verify the companion can reach the internal Paperless API, sign in, and process a non-sensitive test document. Review the [pinned 4.5 upgrade instructions](https://github.com/clusterzx/paperless-ai/blob/v4.5.1/docs/guide/upgrading.md#to-45) before accepting the update. Retain the verified backup; changing image tags back does not undo schema or metadata changes.
+
 ## Raise the New Stack Carefully ⚡
 
 After the backup, prerequisite version, secret, and settings are confirmed:
@@ -214,19 +230,3 @@ Keep the pre-upgrade backup until normal operation has been verified for several
 days. A green healthcheck is delightful; a tested restore is better. The former
 is a light on a dashboard. The latter is how you avoid explaining data loss to
 the Four Horsemen of Compliance. 🗃️🔥
-
-## Review Paperless 3.5 host access
-
-Paperless 3.5 restricts accepted HTTP hostnames when `PAPERLESS_URL` is set. Before starting the updated image, add `PAPERLESS_ALLOWED_HOSTS=paperless-ngx` to the existing `.env`. This permits the companion's internal `http://paperless-ngx:8000` API connection. Paperless also permits `localhost` and adds the canonical hostname from `PAPERLESS_URL` automatically.
-
-If you also use a NAS hostname or IP address directly, append that hostname or IP to the comma-separated list without a scheme or port. Keep the internal `paperless-ngx` name; do not use `*`. Keep full trusted origins, including their schemes, in `PAPERLESS_CSRF_TRUSTED_ORIGINS`. Run `make check-env` and `make config` before starting services. A passing localhost healthcheck does not prove the companion's hostname is accepted.
-
-See the [Paperless 3.5 release notes](https://github.com/paperless-ngx/paperless-ngx/releases/tag/v3.5.0) and [allowed-host configuration](https://docs.paperless-ngx.com/configuration/#PAPERLESS_ALLOWED_HOSTS).
-
-## Review Paperless-AI 4.5 data and permissions
-
-The reviewed companion update is `4.5.1`. Existing deployments remain in companion mode; the new standalone archive is opt-in. Keep the complete AI data-directory backup and earlier compromise-recovery precautions before starting it.
-
-At first start, automatic migrations move the search index into `data/index.db` and keep a backup under `data/backups/`. Allow extra startup time for a large archive. Existing accounts become administrators; review account roles and API-key permissions, including administration, document deletion, and label management. Watch folders must be outside the AI data and file-storage directories.
-
-After migration, verify the companion can reach the internal Paperless API, sign in, and process a non-sensitive test document. Review the [pinned 4.5 upgrade instructions](https://github.com/clusterzx/paperless-ai/blob/v4.5.1/docs/guide/upgrading.md#to-45) before accepting the update. Retain the verified backup; changing image tags back does not undo schema or metadata changes.

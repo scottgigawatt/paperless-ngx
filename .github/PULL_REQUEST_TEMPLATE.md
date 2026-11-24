@@ -8,8 +8,7 @@
 
 # Form PR-666: Request to Disturb the Archives 🗃️🔥
 
-The Eternal Change Advisory Board appreciates your submission. The Board is one
-person, but adding "Eternal" doubled its stationery budget.
+The Eternal Change Advisory Board appreciates your submission. The Board is one person, but adding "Eternal" doubled its stationery budget.
 
 ## What mortal machinery changed? ⚙️
 
@@ -19,16 +18,19 @@ person, but adding "Eternal" doubled its stationery budget.
 
 -
 
-## Trial by Paperwork 🧪
+## Validation 🧪
 
 - [ ] `make help`
 - [ ] `make validate`
 - [ ] `pre-commit run --all-files`
 - [ ] `git diff --check`
+- [ ] Changed documentation links, anchors, and GitHub rendering checked (if applicable)
 - [ ] `make config` if a private non-production `.env` was available
 - [ ] Live migration/health checks are clearly separated from local validation
 
-## Anti-Demon Upgrade Wards 🕯️
+## Application or database upgrade safeguards 🕯️
+
+Complete this section for application/database changes; otherwise mark it not applicable.
 
 - [ ] The current and target application/database versions are recorded
 - [ ] Required intermediate versions were not skipped
@@ -36,15 +38,14 @@ person, but adding "Eternal" doubled its stationery budget.
 - [ ] Upstream migration notes were reviewed for major updates
 - [ ] `PAPERLESS_SECRET_KEY` remains stable unless rotation is intentional
 
-## Cerberus Security Inspection 🐕🔐
+## Security inspection 🐕🔐
 
 - [ ] No `.env`, signing key, password, API token, document, database, or private log
 - [ ] Example values remain obviously non-production
 - [ ] Runtime `config/` directories contain only their checked-in `.gitignore` files
 
-## Chief Infernal Archivist's Notes 🖋️
+## Review notes 🖋️
 
 -
 
-By submitting this form, I acknowledge that "the database looked fine from
-across the room" is not a rollback plan.
+By submitting this form, I acknowledge that "the database looked fine from across the room" is not a rollback plan.

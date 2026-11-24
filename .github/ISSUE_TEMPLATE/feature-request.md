@@ -16,23 +16,26 @@ assignees: scottgigawatt
 
 # Form NEW-666: Petition for Additional Bureaucracy ✨📜
 
-**Which mortal inconvenience requires eternal intervention?**
+## Problem
+
 What limitation or operational pain are you encountering?
 
-**Requested infernal machinery**
+## Requested behavior
+
 Describe the desired behavior.
 
-**Which departmental basement should contain it?**
-Is this a Compose setting, service integration, validation check, workflow, or
-documentation change?
+## Affected component
 
-**Less dramatic alternatives considered**
+Is this a Compose setting, service integration, validation check, workflow, or documentation change?
+
+## Alternatives considered
+
 List workarounds or related upstream features.
 
-**Treaties with the mortal realm**
-Explain any Synology Container Manager, Portainer, architecture, migration, or
-secret-management constraints.
+## Platform and security constraints
 
-**Offerings for the review committee**
-Links, redacted examples, or sketches are welcome. Souls are not an accepted
-dependency-management format.
+Explain any Synology Container Manager, Portainer, architecture, migration, or secret-management constraints.
+
+## Additional context
+
+Links, redacted examples, or sketches are welcome. Souls are not an accepted dependency-management format.

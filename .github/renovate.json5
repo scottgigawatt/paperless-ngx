@@ -1,112 +1,126 @@
+//
+// Copyright 2025-2026 Scott Gigawatt
+//
+// Licensed under the Apache License, Version 2.0.
+//
+// renovate.json5: Automated dependency update policy for the Paperless deployment.
+//
 {
-    $schema: 'https://docs.renovatebot.com/renovate-schema.json',
-    extends: [
-        'config:recommended',
-        'helpers:pinGitHubActionDigests',
-        ':enablePreCommit',
+    //
+    // Renovate schema and shared safe defaults.
+    //
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": [
+        "config:recommended",
+        "helpers:pinGitHubActionDigests",
+        ":enablePreCommit"
     ],
-    timezone: 'America/New_York',
-    schedule: [
-        '* 0-7 1 * *',
-    ],
-    automergeSchedule: [
-        '* 0-7 1 * *',
-    ],
-    updateNotScheduled: false,
-    prConcurrentLimit: 2,
-    dependencyDashboard: {
-        enabled: true,
+
+    //
+    // Keep dependency work predictable for a single-maintainer repository.
+    //
+    "timezone": "America/New_York",
+    "schedule": ["* 0-7 1 * *"],
+    "automergeSchedule": ["* 0-7 1 * *"],
+    "updateNotScheduled": false,
+    "prConcurrentLimit": 2,
+    "dependencyDashboard": {
+        "enabled": true
     },
-    automerge: true,
-    automergeType: 'pr',
-    automergeStrategy: 'squash',
-    platformAutomerge: false,
-    rebaseWhen: 'behind-base-branch',
-    assignees: [
-        'scottgigawatt',
-    ],
-    reviewers: [
-        'scottgigawatt',
-    ],
-    vulnerabilityAlerts: {
-        enabled: true,
-        dependencyDashboardApproval: false,
-        groupName: null,
-        automerge: false,
-        schedule: [
-            'at any time',
-        ],
-        automergeSchedule: [
-            'at any time',
-        ],
-        updateNotScheduled: true,
+
+    //
+    // Merge dependency PRs after required checks pass; keep branches current.
+    //
+    "automerge": true,
+    "automergeType": "pr",
+    "automergeStrategy": "squash",
+    "platformAutomerge": false,
+    "rebaseWhen": "behind-base-branch",
+    "assignees": ["scottgigawatt"],
+    "reviewers": ["scottgigawatt"],
+
+    //
+    // Propose security fixes immediately in separate PRs for manual review.
+    //
+    "vulnerabilityAlerts": {
+        "enabled": true,
+        "dependencyDashboardApproval": false,
+        "groupName": null,
+        "automerge": false,
+        "schedule": ["at any time"],
+        "automergeSchedule": ["at any time"],
+        "updateNotScheduled": true
     },
-    enabledManagers: [
-        'custom.regex',
-        'docker-compose',
-        'github-actions',
-        'pre-commit',
+
+    //
+    // Renovate owns the repository's Compose, workflow, and hook updates.
+    //
+    "enabledManagers": [
+        "custom.regex",
+        "docker-compose",
+        "github-actions",
+        "pre-commit"
     ],
-    customManagers: [
+
+    //
+    // Track image versions defined in example.env instead of directly in YAML.
+    //
+    "customManagers": [
         {
-            customType: 'regex',
-            managerFilePatterns: [
-                '/^example\\.env$/',
+            "customType": "regex",
+            "managerFilePatterns": [
+                "/^example\\.env$/"
             ],
-            matchStrings: [
-                '# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n[A-Z0-9_]+_TAG="\\$\\{[A-Z0-9_]+_TAG:-(?<currentValue>[^}]+)\\}"',
+            "matchStrings": [
+                "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n[A-Z0-9_]+_TAG=\"\\$\\{[A-Z0-9_]+_TAG:-(?<currentValue>[^}]+)\\}\""
             ],
-            versioningTemplate: 'docker',
-        },
+            "versioningTemplate": "docker"
+        }
     ],
-    packageRules: [
+
+    //
+    // Keep related dependency updates grouped for one coordinated review.
+    //
+    "packageRules": [
         {
-            groupName: 'GitHub Actions',
-            matchManagers: [
-                'github-actions',
-            ],
+            "groupName": "GitHub Actions",
+            "matchManagers": ["github-actions"]
         },
         {
-            groupName: 'Compose images',
-            matchManagers: [
-                'custom.regex',
-                'docker-compose',
-            ],
+            "groupName": "Compose images",
+            "matchManagers": ["custom.regex", "docker-compose"]
         },
         {
-            groupName: 'Pre-commit hooks',
-            matchManagers: [
-                'pre-commit',
-            ],
+            "groupName": "Pre-commit hooks",
+            "matchManagers": ["pre-commit"]
         },
+
+        //
+        // Combine routine tooling updates during the monthly maintenance window.
+        //
         {
-            matchUpdateTypes: [
-                'minor',
-                'patch',
-                'pin',
-                'digest',
-            ],
-            groupName: 'monthly maintenance',
+            "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+            "groupName": "monthly maintenance"
         },
+
+        //
+        // Keep shared image pins together in the weekly production window.
+        //
         {
-            matchDatasources: [
-                'docker',
-            ],
-            schedule: [
-                '* 0-7 * * 1',
-            ],
-            automergeSchedule: [
-                '* 0-7 * * 1',
-            ],
-            groupName: 'weekly production dependencies',
+            "matchDatasources": ["docker"],
+            "schedule": ["* 0-7 * * 1"],
+            "automergeSchedule": ["* 0-7 * * 1"],
+            "groupName": "weekly production dependencies"
         },
+
+        //
+        // Require dashboard approval for major upgrades and keep them separate.
+        //
         {
-            matchUpdateTypes: [
-                'major',
-            ],
-            dependencyDashboardApproval: true,
-            automerge: false,
-            groupName: null,
-        },
-    ],
+            "matchUpdateTypes": ["major"],
+            "dependencyDashboardApproval": true,
+            "automerge": false,
+            "groupName": null
+        }
+    ]
 }
